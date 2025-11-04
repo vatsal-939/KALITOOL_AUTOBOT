@@ -1,0 +1,7 @@
+2025-11-04 10:58:26 | ERROR    | KaliToolAutoBot | Engine error: argument of type 'NoneType' is not iterable
+2025-11-04 11:07:25 | ERROR    | KaliToolAutoBot | Engine error: argument of type 'NoneType' is not iterable
+2025-11-04 12:02:00 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
+2025-11-04 12:02:00 | ERROR    | KaliToolAutoBot | Adapter error: Could not find adapter class in tools.Nmap.nmap_adapter
+2025-11-04 12:06:43 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
+2025-11-04 12:11:16 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ncat
+2025-11-04 12:35:16 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ncat

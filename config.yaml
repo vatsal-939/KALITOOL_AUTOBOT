@@ -1,0 +1,37 @@
+# General project configuration for KALITOOL_AUTOBOT
+# Edit these values to match your environment.
+
+# Paths
+yaml_dir: "yaml"                   # where manifests live (relative to project root)
+manifests_dir: "manifests"          # alias for yaml_dir (for backward compatibility)
+tools_dir: "tools"                  # adapters
+reports_dir: "reports"              # output reports
+logs_dir: "logs"                    # runtime logs
+parsers_dir: "parsers"              # parser modules
+validators_pkg: "validators"        # validators python package
+
+# Runtime / safety
+default_timeout_seconds: 300        # default timeout for subprocess.run (seconds)
+dry_run_default: true               # default behavior: show dry-run before executing
+enforce_scope: true                 # require --scope or allowed-targets for high-risk commands
+allowed_targets_file: "config/allowed_targets.txt"  # path to allowed targets list (optional)
+
+# Concurrency / job control
+max_concurrent_jobs: 4              # max parallel tool executions
+background_job_dir: "jobs"          # persist job PIDs / metadata if backgrounding
+
+# Execution / logging
+log_level: "INFO"                   # DEBUG, INFO, WARNING, ERROR
+log_file: "logs/runtime.log"
+audit_log_file: "logs/audit.log"    # contains executed command, user, timestamp, manifest version
+
+# UX
+ask_detailed_questions: true        # if false, ask minimal prompts only
+auto_add_xml_output_for_parsers: true  # engine will add "-oX -" when parser expects XML on stdout
+
+# Validators & manifests
+validator_module_prefix: "validators"  # python package prefix for validators referenced in manifests
+manifest_extension: ".yaml"
+
+# Misc
+default_output_format: "json"       # preferred report format (json, xml, txt)
