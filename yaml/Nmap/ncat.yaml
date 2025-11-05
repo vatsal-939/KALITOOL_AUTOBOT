@@ -1,0 +1,352 @@
+# yaml/Nmap/ncat.yaml
+tool_id: Nmap
+command_id: ncat
+display_name: Ncat (ncat)
+version: "1.0"
+description: >
+  Ncat  - flexible networking tool (part of Nmap). Supports TCP/UDP/SCTP,
+  Unix sockets, vsock, SSL/TLS, proxying, brokering, chat, file dump,
+  exec-on-connect, Lua execution, and many session options.
+
+category: networking
+default_output_dir: "reports/nmap"
+
+# High-level services presented to the user
+services:
+  - id: connect
+    label: "Client: connect to remote host"
+    description: "Connect to a remote host:port (TCP default)."
+    command_template:
+      - "ncat"
+      - "{ipv_flag}"
+      - "{unix_or_vsock}"
+      - "{proto_flag}"
+      - "{nodns_flag}"
+      - "{target_host}"
+      - "{target_port}"
+      - "{client_options}"
+    placeholders:
+      ipv_flag:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "Auto (use IPv4/IPv6 as appropriate)"}
+          - {id: ipv4, flag: "-4", label: "Force IPv4"}
+          - {id: ipv6, flag: "-6", label: "Force IPv6"}
+      unix_or_vsock:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "Network sockets"}
+          - {id: unix, flag: "-U", label: "Use Unix domain sockets (-U)"}
+          - {id: vsock, flag: "--vsock", label: "Use vsock sockets (--vsock)"}
+      proto_flag:
+        type: enum
+        choices:
+          - {id: tcp, flag: "", label: "TCP (default)"}
+          - {id: udp, flag: "-u", label: "UDP (-u)"}
+          - {id: sctp, flag: "--sctp", label: "SCTP (--sctp)"}
+      nodns_flag:
+        type: enum
+        choices:
+          - {id: nodns_false, flag: "", label: "Resolve DNS (default)"}
+          - {id: nodns, flag: "-n", label: "Do not resolve hostnames (-n)"}
+      target_host:
+        type: hostname_or_ip
+        prompt: "Target host (hostname or IP). For Unix socket provide path in host field and leave port empty."
+      target_port:
+        type: port_optional
+        prompt: "Target port (leave empty for Unix socket or services that don't need a port)"
+      client_options:
+        type: multi_enum
+        choices:
+          - {id: crlf, flag: "-C", label: "Use CRLF for EOL (-C)"}
+          - {id: send_only, flag: "--send-only", label: "Send-only (quit on EOF)"}
+          - {id: recv_only, flag: "--recv-only", label: "Receive-only"}
+          - {id: no_shutdown, flag: "--no-shutdown", label: "Continue half-duplex on EOF"}
+          - {id: zero_io, flag: "-z", label: "Zero-I/O mode (status only)"}
+          - {id: output, flag: "-o", arg: "file", label: "Dump session data to file (-o <file>)"}
+          - {id: hex_dump, flag: "-x", arg: "file", label: "Dump session as hex (-x <file>)"}
+          - {id: idle_timeout, flag: "-i", arg: "time", label: "Idle read/write timeout (-i <time>)"}
+          - {id: source_port, flag: "-p", arg: "port", label: "Source port (-p <port>)"}
+          - {id: source_addr, flag: "-s", arg: "addr", label: "Source address (-s <addr>)"}
+          - {id: verbose, flag: "-v", arg: "count", label: "Verbosity (-v repeated). Enter integer count to repeat."}
+          - {id: wait, flag: "-w", arg: "time", label: "Connect timeout (-w <time>)"}
+          - {id: delay, flag: "-d", arg: "time", label: "Delay between read/writes (-d <time>)"}
+          - {id: append_output, flag: "--append-output", label: "Append rather than clobber outputs"}
+          - {id: max_conns, flag: "-m", arg: "n", label: "Maximum simultaneous connections (-m <n>)"}
+          - {id: version, flag: "--version", label: "Show ncat version and exit"}
+    parser: parsers.ncat_text
+    risk_level: low
+
+  - id: listen
+    label: "Server: listen for incoming connections"
+    description: "Listen on a local port or Unix socket and accept connections."
+    command_template:
+      - "ncat"
+      - "{ipv_flag}"
+      - "{unix_or_vsock}"
+      - "-l"
+      - "{transport_flag}"
+      - "-p"
+      - "{port}"
+      - "{listen_options}"
+    placeholders:
+      ipv_flag:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "Auto"}
+          - {id: ipv4, flag: "-4", label: "IPv4 only (-4)"}
+          - {id: ipv6, flag: "-6", label: "IPv6 only (-6)"}
+      unix_or_vsock:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "Network sockets"}
+          - {id: unix, flag: "-U", label: "Unix domain socket (-U)"}
+          - {id: vsock, flag: "--vsock", label: "Vsock (--vsock)"}
+      transport_flag:
+        type: enum
+        choices:
+          - {id: tcp, flag: "", label: "TCP (default)"}
+          - {id: udp, flag: "-u", label: "UDP (-u)"}
+          - {id: sctp, flag: "--sctp", label: "SCTP (--sctp)"}
+      port:
+        type: port
+        prompt: "Port to listen on (for Unix socket leave blank and use -U)"
+      listen_options:
+        type: multi_enum
+        choices:
+          - {id: keep_open, flag: "-k", label: "Keep open for multiple connections (-k)"}
+          - {id: ssl, flag: "--ssl", label: "Enable SSL/TLS (--ssl)"}
+          - {id: ssl_cert, flag: "--ssl-cert", arg: "file", label: "SSL cert PEM (--ssl-cert <file>)"}
+          - {id: ssl_key, flag: "--ssl-key", arg: "file", label: "SSL key PEM (--ssl-key <file>)"}
+          - {id: ssl_verify, flag: "--ssl-verify", label: "Verify SSL cert names (--ssl-verify)"}
+          - {id: ssl_trustfile, flag: "--ssl-trustfile", arg: "file", label: "Trusted certs PEM (--ssl-trustfile <file>)"}
+          - {id: ssl_ciphers, flag: "--ssl-ciphers", arg: "ciphers", label: "SSL cipher list (--ssl-ciphers <list>)"}
+          - {id: ssl_servername, flag: "--ssl-servername", arg: "name", label: "SNI server name (--ssl-servername <name>)"}
+          - {id: ssl_alpn, flag: "--ssl-alpn", arg: "protos", label: "ALPN protocols (--ssl-alpn <list>)"}
+          - {id: exec, flag: "-e", arg: "cmd", label: "Execute program on connect (-e <command>)", risk: high}
+          - {id: sh_exec, flag: "-c", arg: "command", label: "Execute via /bin/sh (-c <command>)", risk: high}
+          - {id: lua_exec, flag: "--lua-exec", arg: "file", label: "Execute Lua script (--lua-exec <file>)", risk: high}
+          - {id: allow, flag: "--allow", arg: "hosts", label: "Allow only listed hosts (--allow <hosts>)"}
+          - {id: allowfile, flag: "--allowfile", arg: "file", label: "Allow hosts from file (--allowfile <file>)"}
+          - {id: deny, flag: "--deny", arg: "hosts", label: "Deny listed hosts (--deny <hosts>)"}
+          - {id: denyfile, flag: "--denyfile", arg: "file", label: "Deny hosts from file (--denyfile <file>)"}
+          - {id: broker, flag: "--broker", label: "Enable brokering (--broker)"}
+          - {id: chat, flag: "--chat", label: "Start chat server (--chat)"}
+          - {id: telnet, flag: "-t", label: "Answer Telnet negotiations (-t)"}
+          - {id: crlf, flag: "-C", label: "Use CRLF for EOL (-C)"}
+          - {id: append_output, flag: "--append-output", label: "Append outputs"}
+          - {id: output, flag: "-o", arg: "file", label: "Dump session to file (-o <file>)"}
+          - {id: hex_dump, flag: "-x", arg: "file", label: "Hex dump to file (-x <file>)"}
+          - {id: max_conns, flag: "-m", arg: "n", label: "Max simultaneous connections (-m <n>)"}
+    parser: parsers.ncat_text
+    risk_level: medium
+    requires_scope_confirmation: true
+
+  - id: proxy_client
+    label: "Proxy client / relay"
+    description: "Relay connections via HTTP/SOCKS proxies."
+    command_template:
+      - "ncat"
+      - "{ipv_flag}"
+      - "{unix_or_vsock}"
+      - "--proxy-type"
+      - "{proxy_type}"
+      - "--proxy"
+      - "{proxy_addr}"
+      - "{proxy_auth}"
+      - "{proxy_dns}"
+      - "{dest}"
+      - "{proxy_options}"
+    placeholders:
+      ipv_flag:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "Auto"}
+          - {id: ipv4, flag: "-4", label: "IPv4"}
+          - {id: ipv6, flag: "-6", label: "IPv6"}
+      proxy_type:
+        type: enum
+        choices:
+          - {id: http, value: "http", label: "HTTP"}
+          - {id: socks4, value: "socks4", label: "SOCKS4"}
+          - {id: socks5, value: "socks5", label: "SOCKS5"}
+      proxy_addr:
+        type: hostport
+        prompt: "Proxy address (host[:port])"
+      proxy_auth:
+        type: string_optional
+        prompt: "Proxy auth user:pass (optional)"
+      proxy_dns:
+        type: enum
+        choices:
+          - {id: default, flag: "", label: "Default (proxy decides)"}
+          - {id: proxy_dns, flag: "--proxy-dns", label: "Resolve via proxy (--proxy-dns)"}
+      dest:
+        type: hostport
+        prompt: "Destination host:port to reach via proxy"
+      proxy_options:
+        type: multi_enum
+        choices:
+          - {id: ssl, flag: "--ssl", label: "Use SSL for connection (--ssl)"}
+          - {id: proxy_auth_flag, flag: "--proxy-auth", arg: "auth", label: "Proxy auth (--proxy-auth <auth>)"}
+    parser: parsers.ncat_text
+    risk_level: medium
+
+  - id: file_transfer
+    label: "File send / receive"
+    description: "Use ncat to send or receive files (client connect or server listen)."
+    command_template:
+      - "ncat"
+      - "{ipv_flag}"
+      - "{unix_or_vsock}"
+      - "{mode_flag}"
+      - "{host_or_port}"
+      - "{file_arg}"
+      - "{file_options}"
+    placeholders:
+      ipv_flag:
+        type: enum
+        choices:
+          - {id: none, flag: ""}
+          - {id: ipv4, flag: "-4"}
+          - {id: ipv6, flag: "-6"}
+      unix_or_vsock:
+        type: enum
+        choices:
+          - {id: none, flag: ""}
+          - {id: unix, flag: "-U"}
+          - {id: vsock, flag: "--vsock"}
+      mode_flag:
+        type: enum
+        choices:
+          - {id: send, flag: "", label: "Send (connect & send file)"}
+          - {id: recv, flag: "-l", label: "Receive (listen & write file)"}
+      host_or_port:
+        type: hostport_or_port
+        prompt: "If sending: target host:port. If receiving: port to listen on."
+      file_arg:
+        type: filepath
+        prompt: "File to send (or destination filename when receiving)"
+      file_options:
+        type: multi_enum
+        choices:
+          - {id: send_only, flag: "--send-only", label: "Send-only"}
+          - {id: recv_only, flag: "--recv-only", label: "Receive-only"}
+          - {id: output, flag: "-o", arg: "file", label: "Dump session to file"}
+          - {id: hex_dump, flag: "-x", arg: "file", label: "Hex dump to file"}
+    parser: parsers.ncat_text
+    risk_level: low
+
+  - id: misc_and_debug
+    label: "Misc / debug / advanced"
+    description: "Other flags and advanced options."
+    command_template:
+      - "ncat"
+      - "{ipv_flag}"
+      - "{unix_or_vsock}"
+      - "{misc_flags}"
+      - "{target_or_args}"
+    placeholders:
+      ipv_flag:
+        type: enum
+        choices:
+          - {id: none, flag: ""}
+          - {id: ipv4, flag: "-4", label: "IPv4 only"}
+          - {id: ipv6, flag: "-6", label: "IPv6 only"}
+      unix_or_vsock:
+        type: enum
+        choices:
+          - {id: none, flag: ""}
+          - {id: unix, flag: "-U", label: "Unix socket"}
+          - {id: vsock, flag: "--vsock", label: "Vsock"}
+      misc_flags:
+        type: multi_enum
+        choices:
+          - {id: crlf, flag: "-C", label: "CRLF EOL (-C)"}
+          - {id: sh_exec, flag: "-c", arg: "command", label: "Execute via /bin/sh (-c <command>)", risk: high}
+          - {id: exec, flag: "-e", arg: "command", label: "Execute program on connect (-e <command>)", risk: high}
+          - {id: lua_exec, flag: "--lua-exec", arg: "file", label: "Execute Lua script (--lua-exec <file>)", risk: high}
+          - {id: src_route_g, flag: "-g", arg: "hops", label: "Loose source routing hops (-g hop1,hop2,...)", risk: high}
+          - {id: src_route_G, flag: "-G", arg: "n", label: "Loose source routing pointer (-G <n>)", risk: high}
+          - {id: max_conns, flag: "-m", arg: "n", label: "Max simultaneous connections (-m <n>)"}
+          - {id: delay, flag: "-d", arg: "time", label: "Delay between read/writes (-d <time>)"}
+          - {id: output, flag: "-o", arg: "file", label: "Dump session data (-o <file>)"}
+          - {id: hex_dump, flag: "-x", arg: "file", label: "Hex dump (-x <file>)"}
+          - {id: idle_timeout, flag: "-i", arg: "time", label: "Idle timeout (-i <time>)"}
+          - {id: source_port, flag: "-p", arg: "port", label: "Source port (-p <port>)"}
+          - {id: source_addr, flag: "-s", arg: "addr", label: "Source address (-s <addr>)"}
+          - {id: nodns, flag: "-n", label: "Do not resolve hostnames (-n)"}
+          - {id: telnet, flag: "-t", label: "Answer Telnet negotiations (-t)"}
+          - {id: udp, flag: "-u", label: "UDP mode (-u)"}
+          - {id: sctp, flag: "--sctp", label: "SCTP mode (--sctp)"}
+          - {id: verbose, flag: "-v", arg: "count", label: "Verbosity (-v repeated), supply count"}
+          - {id: wait, flag: "-w", arg: "time", label: "Connect timeout (-w <time>)"}
+          - {id: zero_io, flag: "-z", label: "Zero-I/O mode (-z)"}
+          - {id: append_output, flag: "--append-output", label: "Append outputs"}
+          - {id: send_only, flag: "--send-only", label: "Send-only"}
+          - {id: recv_only, flag: "--recv-only", label: "Receive-only"}
+          - {id: no_shutdown, flag: "--no-shutdown", label: "Continue half-duplex (--no-shutdown)"}
+          - {id: allow, flag: "--allow", arg: "hosts", label: "Allow hosts (--allow <hosts>)"}
+          - {id: allowfile, flag: "--allowfile", arg: "file", label: "Allow hosts from file (--allowfile <file>)"}
+          - {id: deny, flag: "--deny", arg: "hosts", label: "Deny hosts (--deny <hosts>)"}
+          - {id: denyfile, flag: "--denyfile", arg: "file", label: "Deny hosts from file (--denyfile <file>)"}
+          - {id: broker, flag: "--broker", label: "Enable broker mode (--broker)"}
+          - {id: chat, flag: "--chat", label: "Start chat server (--chat)"}
+          - {id: proxy, flag: "--proxy", arg: "addr", label: "Proxy address (--proxy <addr[:port]>)"}
+          - {id: proxy_type, flag: "--proxy-type", arg: "type", label: "Proxy type (--proxy-type <http|socks4|socks5>)"}
+          - {id: proxy_auth, flag: "--proxy-auth", arg: "auth", label: "Proxy auth (--proxy-auth <user:pass>)"}
+          - {id: proxy_dns, flag: "--proxy-dns", label: "Resolve via proxy (--proxy-dns)"}
+          - {id: ssl, flag: "--ssl", label: "Use SSL/TLS (--ssl)"}
+          - {id: ssl_cert, flag: "--ssl-cert", arg: "file", label: "SSL cert PEM (--ssl-cert <file>)"}
+          - {id: ssl_key, flag: "--ssl-key", arg: "file", label: "SSL key PEM (--ssl-key <file>)"}
+          - {id: ssl_verify, flag: "--ssl-verify", label: "Verify SSL certs (--ssl-verify)"}
+          - {id: ssl_trustfile, flag: "--ssl-trustfile", arg: "file", label: "SSL trust PEM (--ssl-trustfile <file>)"}
+          - {id: ssl_ciphers, flag: "--ssl-ciphers", arg: "ciphers", label: "SSL cipher list (--ssl-ciphers <list>)"}
+          - {id: ssl_servername, flag: "--ssl-servername", arg: "name", label: "SSL SNI (--ssl-servername <name>)"}
+          - {id: ssl_alpn, flag: "--ssl-alpn", arg: "protos", label: "SSL ALPN (--ssl-alpn <list>)"}
+          - {id: version, flag: "--version", label: "Show version"}
+    parser: parsers.ncat_text
+    risk_level: low
+    notes:
+      - "Flags marked risk: high require explicit authorization before execution."
+
+# Global validators referenced by placeholders
+placeholders_global_validators:
+  validate_host:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_host_or_path
+    message: "Enter a valid hostname, IP, or Unix socket path."
+  validate_port:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_port
+    message: "Enter a valid TCP/UDP port (1-65535)."
+  validate_hostport:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_host_and_port
+    message: "Enter host:port in the format host:port (e.g., 10.0.0.1:8080)."
+  validate_file_exists:
+    type: python_callable
+    module: validators.file_validators
+    func: validate_file_exists
+    message: "File not found."
+
+# Parser mapping
+parsers:
+  - id: parsers.ncat_text
+    module: parsers.ncat_text
+    description: "Generic text parser for Ncat sessions."
+
+examples:
+  - label: "Connect to example.com:80"
+    command: ["ncat","example.com","80"]
+  - label: "Listen on 4444 and keep open"
+    command: ["ncat","-l","-p","4444","-k"]
+  - label: "Listen with SSL and exec /bin/bash (high risk)"
+    command: ["ncat","-l","-p","4444","--ssl","--ssl-cert","/path/cert.pem","--ssl-key","/path/key.pem","-e","/bin/bash"]
+
+notes:
+  - "This manifest mirrors `ncat -h` options. Some flags are platform-dependent (Unix sockets, vsock, SCTP)."
+  - "Adapter should validate file paths for cert/key and require confirmation for high-risk flags (-e, -c, --lua-exec)."

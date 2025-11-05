@@ -82,10 +82,10 @@ def display_commands(tool, tools_dict):
 # --------------------------------------
 def main():
     print("""
- ================================================================
-              KaliTool AutoBot v1.0 (CLI)
-    Automate, Validate & Execute Kali Commands from YAML
- ================================================================
+ ╔════════════════════════════════════════════════════════════╗
+║              🔥  KaliTool AutoBot v1.0 (CLI)  🔥            ║
+║    Automate, Validate & Execute Kali Commands from YAML      ║
+ ╚════════════════════════════════════════════════════════════╝
     """)
 
     config_path = "config.yaml"
@@ -96,6 +96,7 @@ def main():
     # Load config to find YAML directory
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
+        
     yaml_dir = config["yaml_dir"]
 
     # Step 1: List all tools and commands

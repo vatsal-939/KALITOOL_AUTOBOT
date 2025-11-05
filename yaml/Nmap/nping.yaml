@@ -1,0 +1,66 @@
+tool_id: Nmap
+command_id: nping
+display_name: Nping (nping)
+version: "1.0"
+description: >
+  Nping generates network packets and measures response times. Useful for ping-like
+  tests over TCP/UDP/ICMP/ARP and for traceroute-style probing.
+
+category: networking
+default_output_dir: "reports/nmap"
+
+services:
+  - id: probe
+    label: "Send probes"
+    description: "Send probes to a target using TCP/UDP/ICMP/ARP/TR modes."
+    command_template:
+      - "nping"
+      - "{mode}"
+      - "{port_opt}"
+      - "{count_opt}"
+      - "{delay_opt}"
+      - "{ttl_opt}"
+      - "{verbosity}"
+      - "{target}"
+    placeholders:
+      mode:
+        type: enum
+        choices:
+          - {id: tcp, flag: "--tcp", label: "TCP"}
+          - {id: udp, flag: "--udp", label: "UDP"}
+          - {id: icmp, flag: "--icmp", label: "ICMP"}
+          - {id: arp, flag: "--arp", label: "ARP"}
+          - {id: tr, flag: "--tr", label: "Traceroute"}
+      port_opt:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "No port (ICMP/ARP/TR)"}
+          - {id: port, flag: "-p", arg: "port", label: "Destination port"}
+      count_opt:
+        type: enum
+        choices:
+          - {id: default, flag: "", label: "Default count"}
+          - {id: count, flag: "--count", arg: "n", label: "Number of probes"}
+      delay_opt:
+        type: enum
+        choices:
+          - {id: default, flag: "", label: "Default delay"}
+          - {id: delay, flag: "--delay", arg: "time", label: "Delay between probes"}
+      ttl_opt:
+        type: enum
+        choices:
+          - {id: default, flag: "", label: "System TTL"}
+          - {id: ttl, flag: "--ttl", arg: "val", label: "Packet TTL"}
+      verbosity:
+        type: enum
+        choices:
+          - {id: normal, flag: "", label: "Normal"}
+          - {id: verbose, flag: "-v", label: "Verbose"}
+      target:
+        type: hostname_or_ip
+        prompt: "Target host or IP"
+
+parsers:
+  - id: parsers.nping_text
+    module: parsers.nping_text
+    description: "Parses nping output into structured data."

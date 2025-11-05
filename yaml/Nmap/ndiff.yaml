@@ -1,0 +1,50 @@
+tool_id: Nmap
+command_id: ndiff
+display_name: Ndiff (ndiff)
+version: "1.0"
+description: >
+  The ndiff tool compares two Nmap XML output files and shows the differences in
+  host states, port states, or service/OS detection results. It is useful for
+  tracking changes between network scans over time.
+
+category: reporting
+default_output_dir: "reports/nmap"
+
+services:
+  - id: compare_xml
+    label: "Compare two Nmap XML files"
+    description: "Diff two Nmap XML reports and show changes."
+    command_template:
+      - "ndiff"
+      - "{output_format}"
+      - "{verbosity}"
+      - "{first_file}"
+      - "{second_file}"
+    placeholders:
+      output_format:
+        type: enum
+        choices:
+          - {id: text, flag: "--text", label: "Text output (default)"}
+          - {id: xml, flag: "--xml", label: "XML output"}
+      verbosity:
+        type: enum
+        choices:
+          - {id: normal, flag: "", label: "Normal"}
+          - {id: verbose, flag: "-v", label: "Verbose (show unchanged)"}
+      first_file:
+        type: filepath
+        prompt: "Path to first Nmap XML file"
+      second_file:
+        type: filepath
+        prompt: "Path to second Nmap XML file"
+
+parsers:
+  - id: parsers.ndiff_text
+    module: parsers.ndiff_text
+    description: "Parses ndiff output (text or XML) into structured data."
+
+examples:
+  - label: "Compare two scans"
+    command: ["ndiff","scan_old.xml","scan_new.xml"]
+  - label: "Verbose XML diff"
+    command: ["ndiff","-v","--xml","old_scan.xml","latest_scan.xml"]

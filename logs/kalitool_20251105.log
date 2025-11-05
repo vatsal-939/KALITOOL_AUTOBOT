@@ -1,0 +1,32 @@
+2025-11-05 09:22:17 | ERROR    | KaliToolAutoBot | Engine error: [ERROR] YAML manifest 'yaml\Nmap\nping.yaml' must have either (tool/command) or (tool_id/command_id)
+2025-11-05 09:23:08 | ERROR    | KaliToolAutoBot | Engine error: [ERROR] YAML manifest 'yaml\Nmap\ndiff.yaml' must have either (tool/command) or (tool_id/command_id)
+2025-11-05 09:23:18 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ncat
+2025-11-05 09:23:36 | ERROR    | KaliToolAutoBot | Command failed: 'ncat' is not recognized as an internal or external command,
+operable program or batch file.
+
+2025-11-05 09:24:25 | ERROR    | KaliToolAutoBot | Engine error: [ERROR] YAML manifest 'yaml\Nmap\nping.yaml' must have either (tool/command) or (tool_id/command_id)
+2025-11-05 17:24:17 | ERROR    | KaliToolAutoBot | Engine error: [ERROR] YAML manifest 'yaml\Nmap\ndiff.yaml' must have either (tool/command) or (tool_id/command_id)
+2025-11-05 17:29:30 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ndiff
+2025-11-05 17:35:20 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ndiff
+2025-11-05 17:37:12 | INFO     | tools.Nmap.ndiff_adapter | Final ndiff command: ndiff --xml -v 'D:\x1.xml' 'D:\x2.xml'
+2025-11-05 17:37:17 | ERROR    | KaliToolAutoBot | Command failed: 'ndiff' is not recognized as an internal or external command,
+operable program or batch file.
+
+2025-11-05 17:37:44 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
+2025-11-05 17:40:28 | ERROR    | KaliToolAutoBot | Command failed: 'nmap' is not recognized as an internal or external command,
+operable program or batch file.
+
+2025-11-05 17:40:45 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nping
+2025-11-05 17:42:07 | INFO     | tools.Nmap.nping_adapter | Constructed nping command: nping --udp -p 8081 --count 3 --ttl 2 -v 192.168.1.100
+2025-11-05 17:42:15 | ERROR    | KaliToolAutoBot | Command failed: 'nping' is not recognized as an internal or external command,
+operable program or batch file.
+
+2025-11-05 17:42:26 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/zenmap
+2025-11-05 17:42:26 | ERROR    | KaliToolAutoBot | Adapter error: name 'executable' is not defined
+2025-11-05 17:46:22 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/zenmap
+2025-11-05 17:46:22 | INFO     | tools.Nmap.zenmap_adapter | Configuring zenmap
+2025-11-05 17:50:34 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/zenmap
+2025-11-05 17:50:34 | INFO     | tools.Nmap.zenmap_adapter | Configuring zenmap
+2025-11-05 17:52:20 | ERROR    | KaliToolAutoBot | Command failed: 'zenmap' is not recognized as an internal or external command,
+operable program or batch file.
+

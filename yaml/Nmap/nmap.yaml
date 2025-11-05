@@ -1,0 +1,372 @@
+# yaml/Nmap/nmap.yaml
+tool_id: Nmap
+command_id: nmap
+display_name: Nmap (nmap)
+version: "7.95-manifest"
+description: >
+  Nmap — network discovery and security auditing tool.
+  This manifest covers target specification, host discovery, scan techniques,
+  port selection, service/version detection, script scanning (NSE),
+  OS detection, timing/performance, firewall/IDS evasion, output options,
+  and miscellaneous flags found in `nmap -h`.
+
+category: information_gathering
+default_output_dir: "reports/nmap"
+
+# Top-level services (logical groupings to present to the user)
+services:
+
+  - id: target_specification
+    label: "Target specification"
+    description: "Where to get targets: single hosts, lists, networks, or random."
+    command_template:
+      - "nmap"
+      - "{target_inputs}"
+      - "{target_filters}"
+    placeholders:
+      target_inputs:
+        type: target_multi
+        prompt: "Specify targets (host/IP/network list; e.g. scanme.nmap.org, 192.168.0.0/24)"
+      target_filters:
+        type: multi_enum
+        choices:
+          - {id: input_file, flag: "-iL", arg: "file", label: "Input from file (-iL <filename>)"}
+          - {id: random_targets, flag: "-iR", arg: "num", label: "Choose random targets (-iR <num hosts>)"}
+          - {id: exclude, flag: "--exclude", arg: "hosts", label: "Exclude hosts (--exclude <h1,h2,...>)"}
+          - {id: excludefile, flag: "--excludefile", arg: "file", label: "Exclude from file (--excludefile <file>)"}
+
+    parser: parsers.nmap_xml
+    risk_level: low
+
+  - id: host_discovery
+    label: "Host discovery"
+    description: "Discovery/host ping options."
+    command_template:
+      - "nmap"
+      - "{discovery_flags}"
+      - "{discovery_options}"
+      - "{targets}"
+    placeholders:
+      discovery_flags:
+        type: multi_enum
+        choices:
+          - {id: list_scan, flag: "-sL", label: "List targets (-sL)"}
+          - {id: ping_scan, flag: "-sn", label: "Ping scan (no port scan) (-sn)"}
+          - {id: treat_alive, flag: "-Pn", label: "Treat all hosts as online (-Pn)"}
+          - {id: tcp_disc, flag: "-PS", arg: "portlist", label: "TCP SYN discovery (-PS[ports])"}
+          - {id: tcp_ack, flag: "-PA", arg: "portlist", label: "TCP ACK discovery (-PA[ports])"}
+          - {id: udp_disc, flag: "-PU", arg: "portlist", label: "UDP discovery (-PU[ports])"}
+          - {id: sctp_disc, flag: "-PY", arg: "portlist", label: "SCTP discovery (-PY[ports])"}
+          - {id: icmp_echo, flag: "-PE", label: "ICMP echo probe (-PE)"}
+          - {id: icmp_timestamp, flag: "-PP", label: "ICMP timestamp (-PP)"}
+          - {id: icmp_netmask, flag: "-PM", label: "ICMP netmask (-PM)"}
+          - {id: ip_proto_ping, flag: "-PO", arg: "protocols", label: "IP Protocol Ping (-PO[protocols])"}
+          - {id: never_resolve, flag: "-n", label: "Never do DNS resolution (-n)"}
+          - {id: always_resolve, flag: "-R", label: "Always resolve DNS (-R)"}
+          - {id: dns_servers, flag: "--dns-servers", arg: "servers", label: "Use DNS servers (--dns-servers <s1,s2>)"}
+          - {id: system_dns, flag: "--system-dns", label: "Use OS DNS resolver (--system-dns)"}
+          - {id: traceroute, flag: "--traceroute", label: "Trace hop path (--traceroute)"}
+
+      discovery_options:
+        type: multi_enum
+        choices:
+          - {id: exclude_ports, flag: "--exclude-ports", arg: "ports", label: "Exclude ports (--exclude-ports <range>)"}
+
+    parser: parsers.nmap_xml
+    risk_level: low
+
+  - id: scan_techniques
+    label: "Scan techniques"
+    description: "Choose scanning technique(s)."
+    command_template:
+      - "nmap"
+      - "{scan_flags}"
+      - "{scan_options}"
+      - "{targets}"
+    placeholders:
+      scan_flags:
+        type: multi_enum
+        choices:
+          - {id: syn_scan, flag: "-sS", label: "TCP SYN scan (-sS)"}
+          - {id: tcp_connect, flag: "-sT", label: "TCP connect scan (-sT)"}
+          - {id: ack_scan, flag: "-sA", label: "ACK scan (-sA)"}
+          - {id: window_scan, flag: "-sW", label: "Window scan (-sW)"}
+          - {id: maimon_scan, flag: "-sM", label: "Maimon scan (-sM)"}
+          - {id: udp_scan, flag: "-sU", label: "UDP scan (-sU)"}
+          - {id: null_scan, flag: "-sN", label: "Null scan (-sN)"}
+          - {id: fin_scan, flag: "-sF", label: "FIN scan (-sF)"}
+          - {id: xmas_scan, flag: "-sX", label: "Xmas scan (-sX)"}
+          - {id: scanflags, flag: "--scanflags", arg: "flags", label: "Custom TCP flags (--scanflags <flags>)"}
+          - {id: idle_scan, flag: "-sI", arg: "zombie", label: "Idle scan (-sI <zombie[:probeport]>)"}
+          - {id: sctp_init, flag: "-sY", label: "SCTP INIT scan (-sY)"}
+          - {id: sctp_cookie, flag: "-sZ", label: "SCTP COOKIE-ECHO (-sZ)"}
+          - {id: ip_proto_scan, flag: "-sO", label: "IP protocol scan (-sO)"}
+          - {id: ftp_bounce, flag: "-b", arg: "relay", label: "FTP bounce scan (-b <relay host>)"}
+
+      scan_options:
+        type: multi_enum
+        choices:
+          - {id: scanflags_custom, flag: "--scanflags", arg: "flags", label: "Custom scan flags (--scanflags <flags>)"}
+
+    parser: parsers.nmap_xml
+    risk_level: medium
+
+  - id: port_spec_and_order
+    label: "Ports and scan order"
+    description: "Specify ports and port scanning order."
+    command_template:
+      - "nmap"
+      - "{port_spec}"
+      - "{port_options}"
+      - "{targets}"
+    placeholders:
+      port_spec:
+        type: enum
+        choices:
+          - {id: all_default, flag: "", label: "Default port range"}
+          - {id: specific_ports, flag: "-p", arg: "ports", label: "Specify ports (-p <list/range>)"}
+      port_options:
+        type: multi_enum
+        choices:
+          - {id: exclude_ports, flag: "--exclude-ports", arg: "ports", label: "Exclude ports (--exclude-ports <range>)"}
+          - {id: fast_mode, flag: "-F", label: "Fast mode (-F)"}
+          - {id: sequential, flag: "-r", label: "Scan ports sequentially (-r)"}
+          - {id: top_ports, flag: "--top-ports", arg: "number", label: "Scan top <number> ports (--top-ports <n>)"}
+          - {id: port_ratio, flag: "--port-ratio", arg: "ratio", label: "Port ratio (--port-ratio <ratio>)"}
+
+    parser: parsers.nmap_xml
+    risk_level: low
+
+  - id: service_version_detection
+    label: "Service & version detection"
+    description: "Probe open ports to determine service and version."
+    command_template:
+      - "nmap"
+      - "{service_flags}"
+      - "{service_options}"
+      - "{targets}"
+    placeholders:
+      service_flags:
+        type: multi_enum
+        choices:
+          - {id: service_version, flag: "-sV", label: "Service/version detection (-sV)"}
+      service_options:
+        type: multi_enum
+        choices:
+          - {id: ver_intensity, flag: "--version-intensity", arg: "level", label: "Version intensity (0-9)"}
+          - {id: ver_light, flag: "--version-light", label: "Version light (--version-light)"}
+          - {id: ver_all, flag: "--version-all", label: "Version all (--version-all)"}
+          - {id: ver_trace, flag: "--version-trace", label: "Version trace (--version-trace)"}
+
+    parser: parsers.nmap_xml
+    risk_level: medium
+
+  - id: script_scan
+    label: "NSE Script Scan"
+    description: "Lua NSE scripts for advanced scanning."
+    command_template:
+      - "nmap"
+      - "{script_flags}"
+      - "{script_args}"
+      - "{targets}"
+    placeholders:
+      script_flags:
+        type: multi_enum
+        choices:
+          - {id: default_scripts, flag: "-sC", label: "Default scripts (-sC)"}
+          - {id: script, flag: "--script", arg: "scripts", label: "Script(s)/categories (--script <list>)"}
+          - {id: script_trace, flag: "--script-trace", label: "Script trace (--script-trace)"}
+          - {id: script_updatedb, flag: "--script-updatedb", label: "Update script DB (--script-updatedb)"}
+          - {id: script_help, flag: "--script-help", arg: "scripts", label: "Show script help (--script-help <scripts>)"}
+      script_args:
+        type: multi_enum
+        choices:
+          - {id: script_args, flag: "--script-args", arg: "args", label: "Script args (--script-args <n1=v1,...>)"}
+          - {id: script_args_file, flag: "--script-args-file", arg: "file", label: "Script args file (--script-args-file <file>)"}
+
+    parser: parsers.nmap_xml
+    risk_level: medium
+
+  - id: os_detection
+    label: "OS detection"
+    description: "Fingerprint remote OS and attempts to guess."
+    command_template:
+      - "nmap"
+      - "{os_flags}"
+      - "{targets}"
+    placeholders:
+      os_flags:
+        type: multi_enum
+        choices:
+          - {id: os_detect, flag: "-O", label: "Enable OS detection (-O)"}
+          - {id: os_limit, flag: "--osscan-limit", label: "Limit OS detection (--osscan-limit)"}
+          - {id: os_guess, flag: "--osscan-guess", label: "Aggressive OS guess (--osscan-guess)"}
+
+    parser: parsers.nmap_xml
+    risk_level: medium
+
+  - id: timing_performance
+    label: "Timing & performance"
+    description: "Control scan speed and timeouts."
+    command_template:
+      - "nmap"
+      - "{timing_flags}"
+      - "{timing_options}"
+      - "{targets}"
+    placeholders:
+      timing_flags:
+        type: enum
+        choices:
+          - {id: T0, flag: "-T0", label: "T0 Paranoid"}
+          - {id: T1, flag: "-T1", label: "T1 Sneaky"}
+          - {id: T2, flag: "-T2", label: "T2 Polite"}
+          - {id: T3, flag: "-T3", label: "T3 Normal"}
+          - {id: T4, flag: "-T4", label: "T4 Aggressive"}
+          - {id: T5, flag: "-T5", label: "T5 Insane"}
+      timing_options:
+        type: multi_enum
+        choices:
+          - {id: min_hostgroup, flag: "--min-hostgroup", arg: "size", label: "Min hostgroup"}
+          - {id: max_hostgroup, flag: "--max-hostgroup", arg: "size", label: "Max hostgroup"}
+          - {id: min_parallelism, flag: "--min-parallelism", arg: "num", label: "Min parallelism"}
+          - {id: max_parallelism, flag: "--max-parallelism", arg: "num", label: "Max parallelism"}
+          - {id: min_rtt, flag: "--min-rtt-timeout", arg: "time", label: "Min RTT timeout"}
+          - {id: max_rtt, flag: "--max-rtt-timeout", arg: "time", label: "Max RTT timeout"}
+          - {id: initial_rtt, flag: "--initial-rtt-timeout", arg: "time", label: "Initial RTT timeout"}
+          - {id: max_retries, flag: "--max-retries", arg: "tries", label: "Max retries"}
+          - {id: host_timeout, flag: "--host-timeout", arg: "time", label: "Host timeout"}
+          - {id: scan_delay, flag: "--scan-delay", arg: "time", label: "Scan delay"}
+          - {id: max_scan_delay, flag: "--max-scan-delay", arg: "time", label: "Max scan delay"}
+          - {id: min_rate, flag: "--min-rate", arg: "number", label: "Min rate (pkts/sec)"}
+          - {id: max_rate, flag: "--max-rate", arg: "number", label: "Max rate (pkts/sec)"}
+
+    parser: parsers.nmap_xml
+    risk_level: low
+
+  - id: firewall_evasion
+    label: "Firewall / IDS evasion & spoofing"
+    description: "Options for evasion and spoofing."
+    command_template:
+      - "nmap"
+      - "{evasion_flags}"
+      - "{evasion_options}"
+      - "{targets}"
+    placeholders:
+      evasion_flags:
+        type: multi_enum
+        choices:
+          - {id: fragment, flag: "-f", label: "Fragment packets (-f)"}
+          - {id: mtu, flag: "--mtu", arg: "val", label: "Set MTU (--mtu <val>)"}
+          - {id: decoy, flag: "-D", arg: "decoys", label: "Decoy scan (-D <decoy1,decoy2,...>)"}
+          - {id: spoof_src, flag: "-S", arg: "ip", label: "Spoof source address (-S <IP>)"}
+          - {id: iface, flag: "-e", arg: "iface", label: "Use interface (-e <iface>)"}
+          - {id: source_port, flag: "-g", arg: "portnum", label: "Source port (-g <portnum>)"}
+          - {id: proxies, flag: "--proxies", arg: "urls", label: "Use proxies (--proxies <url1,url2>)"}
+          - {id: data_hex, flag: "--data", arg: "hex", label: "Append hex payload (--data <hex>)"}
+          - {id: data_str, flag: "--data-string", arg: "str", label: "Append ASCII (--data-string <string>)"}
+          - {id: data_len, flag: "--data-length", arg: "num", label: "Append random data (--data-length <num>)"}
+          - {id: ip_options, flag: "--ip-options", arg: "opts", label: "IP options (--ip-options <opts>)"}
+          - {id: ttl, flag: "--ttl", arg: "val", label: "Set TTL (--ttl <val>)"}
+          - {id: spoof_mac, flag: "--spoof-mac", arg: "mac", label: "Spoof MAC (--spoof-mac <mac>)"}
+          - {id: badsum, flag: "--badsum", label: "Send bogus checksum (--badsum)"}
+
+    parser: parsers.nmap_xml
+    risk_level: high
+    requires_scope_confirmation: true
+
+  - id: output_options
+    label: "Output"
+    description: "File and output formatting options."
+    command_template:
+      - "nmap"
+      - "{output_flags}"
+      - "{targets}"
+    placeholders:
+      output_flags:
+        type: multi_enum
+        choices:
+          - {id: out_normal, flag: "-oN", arg: "file", label: "Normal output (-oN <file>)"}
+          - {id: out_xml, flag: "-oX", arg: "file", label: "XML output (-oX <file>)"}
+          - {id: out_script_kiddie, flag: "-oS", arg: "file", label: "Script Kiddie output (-oS <file>)"}
+          - {id: out_grep, flag: "-oG", arg: "file", label: "Grepable output (-oG <file>)"}
+          - {id: out_all, flag: "-oA", arg: "basename", label: "All formats (-oA <basename>)"}
+          - {id: verbose, flag: "-v", label: "Increase verbosity (-v)"}
+          - {id: debug, flag: "-d", label: "Increase debugging (-d)"}
+          - {id: reason, flag: "--reason", label: "Show reason for port state (--reason)"}
+          - {id: open_only, flag: "--open", label: "Show only open ports (--open)"}
+          - {id: packet_trace, flag: "--packet-trace", label: "Show packets (--packet-trace)"}
+          - {id: iflist, flag: "--iflist", label: "Print interfaces & routes (--iflist)"}
+          - {id: append_output, flag: "--append-output", label: "Append to output files"}
+          - {id: resume, flag: "--resume", arg: "file", label: "Resume aborted scan (--resume <file>)"}
+          - {id: noninteractive, flag: "--noninteractive", label: "Disable runtime interactions (--noninteractive)"}
+          - {id: stylesheet, flag: "--stylesheet", arg: "path", label: "XSL stylesheet (--stylesheet <path/URL>)"}
+          - {id: webxml, flag: "--webxml", label: "Reference Nmap stylesheet (--webxml)"}
+          - {id: no_stylesheet, flag: "--no-stylesheet", label: "Prevent stylesheet (--no-stylesheet)"}
+
+    parser: parsers.nmap_xml
+    risk_level: low
+
+  - id: misc
+    label: "Misc / Other"
+    description: "Miscellaneous flags"
+    command_template:
+      - "nmap"
+      - "{misc_flags}"
+      - "{targets}"
+    placeholders:
+      misc_flags:
+        type: multi_enum
+        choices:
+          - {id: ipv6, flag: "-6", label: "Enable IPv6 scanning (-6)"}
+          - {id: all_checks, flag: "-A", label: "Aggressive (-A)"}
+          - {id: datadir, flag: "--datadir", arg: "dirname", label: "Custom data dir (--datadir <dirname>)"}
+          - {id: send_eth, flag: "--send-eth", label: "Send as raw Ethernet (--send-eth)"}
+          - {id: send_ip, flag: "--send-ip", label: "Send as raw IP (--send-ip)"}
+          - {id: privileged, flag: "--privileged", label: "Assume privileged (--privileged)"}
+          - {id: unprivileged, flag: "--unprivileged", label: "Assume unprivileged (--unprivileged)"}
+          - {id: version, flag: "-V", label: "Print version (-V)"}
+          - {id: help, flag: "-h", label: "Print help (-h)"}
+
+    parser: parsers.nmap_xml
+    risk_level: low
+
+# Global validators referenced by placeholders
+placeholders_global_validators:
+  validate_target:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_host_or_path
+    message: "Enter valid hostname, IP, or network (CIDR)."
+  validate_file:
+    type: python_callable
+    module: validators.file_validators
+    func: validate_file_exists
+    message: "File not found."
+  validate_portspec:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_port_range
+    message: "Enter ports or ranges (e.g., 22,80,1-65535)."
+  validate_time:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_non_empty
+    message: "Enter a time value (e.g., 30s, 500ms)."
+
+parsers:
+  - id: parsers.nmap_xml
+    module: parsers.nmap_xml
+    description: "Parses Nmap XML output into structured data."
+
+examples:
+  - label: "Quick scan of common ports"
+    command: ["nmap","-F","scanme.nmap.org"]
+  - label: "Aggressive full scan with OS detection"
+    command: ["nmap","-v","-A","scanme.nmap.org"]
+  - label: "Ping sweep across networks"
+    command: ["nmap","-sn","192.168.0.0/16","10.0.0.0/8"]
+
+notes:
+  - "This manifest models the majority of nmap -h flags. Some advanced or platform-specific flags are omitted for brevity."
+  - "Flags that can accept lists/ranges (ports, decoys, dns servers) expect comma-separated values."
+  - "High-risk evasion flags require explicit user confirmation before execution."

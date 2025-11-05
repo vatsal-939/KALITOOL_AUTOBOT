@@ -1,0 +1,60 @@
+tool_id: Nmap
+command_id: zenmap
+display_name: Zenmap (zenmap)
+version: "7.95"
+description: >
+  Zenmap is the official Nmap GUI. It lets you run scans, manage profiles,
+  and view results interactively.
+
+category: gui
+default_output_dir: "reports/nmap"
+
+services:
+  - id: launch
+    label: "Launch Zenmap"
+    description: "Start Zenmap with optional files, profile, target, or nmap args."
+    command_template:
+      - "zenmap"
+      - "{general_flags}"
+      - "{confdir_opt}"
+      - "{nmap_args}"
+      - "{profile_opt}"
+      - "{target_opt}"
+      - "{file_opt}"
+    placeholders:
+      general_flags:
+        type: multi_enum
+        choices:
+          - {id: help, flag: "--help", label: "Show help"}
+          - {id: version, flag: "--version", label: "Show version"}
+          - {id: verbose, flag: "--verbose", label: "Verbose output"}
+      confdir_opt:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "Default config dir"}
+          - {id: confdir, flag: "--confdir", arg: "dir", label: "Config directory"}
+      nmap_args:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "No direct Nmap args"}
+          - {id: nmap, flag: "--nmap", arg: "args", label: "Nmap arguments"}
+      profile_opt:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "No profile"}
+          - {id: profile, flag: "--profile", arg: "name", label: "Profile name"}
+      target_opt:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "No target"}
+          - {id: target, flag: "--target", arg: "host", label: "Target host/network"}
+      file_opt:
+        type: enum
+        choices:
+          - {id: none, flag: "", label: "No file"}
+          - {id: file, flag: "--file", arg: "path", label: "Open result file"}
+
+parsers:
+  - id: parsers.zenmap_text
+    module: parsers.zenmap_text
+    description: "Placeholder parser for Zenmap startup output."
