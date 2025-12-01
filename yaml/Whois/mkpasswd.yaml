@@ -1,0 +1,112 @@
+# yaml/Whois/mkpasswd.yaml
+tool_id: Whois
+command_id: mkpasswd
+display_name: mkpasswd
+version: "2.x-manifest"
+description: >
+  Generate password hashes using crypt(3) with selectable hashing methods,
+  custom salts, and rounds.
+
+category: password_hashing
+default_output_dir: "reports/whois"
+
+services:
+
+  - id: hashing_options
+    label: "Hashing Options"
+    description: "Options controlling hash algorithm, salt, rounds, and input method."
+    placeholders:
+
+      method:
+        type: enum
+        flag: "--method"
+        prompt: "Select hashing method"
+        allow_empty: true
+        choices:
+          - { id: md5crypt,  arg: "md5crypt", label: "MD5-based crypt" }
+          - { id: sha256crypt, arg: "sha256crypt", label: "SHA-256" }
+          - { id: sha512crypt, arg: "sha512crypt", label: "SHA-512" }
+          - { id: descrypt, arg: "des", label: "DES (weak, default on some systems)" }
+          - { id: help, arg: "help", label: "Show available methods" }
+
+      method_md5_shortcut:
+        type: flag
+        flag: "-5"
+        description: "Shortcut for --method=md5crypt"
+        prompt: "Enable MD5 shortcut (-5)?"
+
+      salt:
+        type: string
+        flag: "--salt"
+        prompt: "Specify custom salt (if empty, a random salt is generated)"
+        allow_empty: true
+
+      rounds:
+        type: numeric
+        flag: "--rounds"
+        prompt: "Number of hashing rounds"
+        allow_empty: true
+
+      password_fd:
+        type: numeric
+        flag: "--password-fd"
+        prompt: "Read password from file descriptor number"
+        allow_empty: true
+
+      stdin_input:
+        type: flag
+        flag: "--stdin"
+        description: "Read password from standard input"
+        prompt: "Read password from STDIN (--stdin)?"
+
+      help:
+        type: flag
+        flag: "--help"
+        description: "Display help and exit"
+        prompt: "Add --help?"
+
+      version:
+        type: flag
+        flag: "--version"
+        description: "Display version and exit"
+        prompt: "Add --version?"
+
+  - id: password_input
+    label: "Password Input"
+    description: "Password and salt arguments (optional - can use STDIN or flags instead)."
+    placeholders:
+      password:
+        type: string
+        prompt: "Enter PASSWORD (leave empty to input interactively or use --stdin)"
+        allow_empty: true
+      salt:
+        type: string
+        prompt: "Enter SALT (leave empty for random generation)"
+        allow_empty: true
+
+# Global validators
+placeholders_global_validators:
+  validate_rounds:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_positive_integer
+    message: "Rounds must be a valid positive integer."
+
+parsers:
+  - id: parsers.mkpasswd_text
+    module: parsers.mkpasswd_text
+    description: "Parser for mkpasswd output."
+
+examples:
+  - label: "SHA512 hash with random salt"
+    command: ["mkpasswd", "--method=sha512crypt"]
+
+  - label: "MD5 hash with custom salt"
+    command: ["mkpasswd", "--method=md5crypt", "--salt", "mysalt", "password123"]
+
+  - label: "Use STDIN for password"
+    command: ["mkpasswd", "--stdin", "--method=sha256crypt"]
+
+notes:
+  - "mkpasswd generates password hashes using crypt(3) with various algorithms."
+  - "Password can be provided as an argument, via STDIN (--stdin), or interactively if omitted."

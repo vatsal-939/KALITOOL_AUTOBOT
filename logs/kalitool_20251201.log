@@ -21,3 +21,15 @@
 2025-12-01 19:23:07 | INFO     | KaliToolAutoBot | Loaded manifest for Masscan/masscan
 2025-12-01 19:24:05 | INFO     | tools.Masscan.masscan_adapter | Executing: masscan -p 8080,9090
 2025-12-01 19:24:05 | ERROR    | tools.Masscan.masscan_adapter | masscan binary not found in PATH.
+2025-12-01 19:36:23 | INFO     | KaliToolAutoBot | Loaded manifest for Masscan/masscan
+2025-12-01 19:36:45 | ERROR    | KaliToolAutoBot | Engine error: [ERROR] YAML manifest 'yaml\Whois\mkpasswd.yaml' must have either (tool/command) or (tool_id/command_id)
+2025-12-01 19:37:35 | ERROR    | KaliToolAutoBot | Engine error: [ERROR] YAML manifest 'yaml\Whois\whois.yaml' must have either (tool/command) or (tool_id/command_id)
+2025-12-01 19:45:30 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd
+2025-12-01 19:45:31 | ERROR    | KaliToolAutoBot | Adapter error: MkpasswdAdapter.execute() missing 1 required positional argument: 'cmd_list'
+2025-12-01 19:46:00 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/whois
+2025-12-01 19:48:07 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/whois
+2025-12-01 19:48:14 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd
+2025-12-01 19:48:14 | ERROR    | KaliToolAutoBot | Adapter error: MkpasswdAdapter.execute() missing 1 required positional argument: 'cmd_list'
+2025-12-01 20:07:22 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd
+2025-12-01 20:08:33 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd
+2025-12-01 20:08:50 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd

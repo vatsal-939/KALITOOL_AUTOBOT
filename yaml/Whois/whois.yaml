@@ -1,0 +1,221 @@
+# yaml/Whois/whois.yaml
+tool_id: Whois
+command_id: whois
+display_name: whois
+version: "5.x-manifest"
+description: >
+  Query domain/IP ownership and registry information via WHOIS protocol.
+  Supports standard flags and RIPE-style extended search options.
+
+category: information_gathering
+default_output_dir: "reports/whois"
+
+services:
+
+  # ----------------------------------------------------------
+  # 1. Standard WHOIS options
+  # ----------------------------------------------------------
+  - id: standard_whois
+    label: "Standard WHOIS Options"
+    description: "General WHOIS flags available on all WHOIS servers."
+    placeholders:
+
+      host:
+        type: string
+        flag: "--host"
+        prompt: "WHOIS server hostname (-h / --host)"
+        allow_empty: true
+
+      port:
+        type: numeric
+        flag: "--port"
+        prompt: "WHOIS server port (-p / --port)"
+        allow_empty: true
+
+      query_iana:
+        type: flag
+        flag: "-I"
+        prompt: "Query whois.iana.org and follow referral (-I)"
+
+      hide_disclaimer:
+        type: flag
+        flag: "-H"
+        prompt: "Hide legal disclaimers (-H)"
+
+      verbose:
+        type: flag
+        flag: "--verbose"
+        prompt: "Verbose mode (--verbose)"
+
+      no_recursion:
+        type: flag
+        flag: "--no-recursion"
+        prompt: "Disable recursion (--no-recursion)"
+
+      help:
+        type: flag
+        flag: "--help"
+        prompt: "Add --help"
+
+      version:
+        type: flag
+        flag: "--version"
+        prompt: "Add --version"
+
+  # ----------------------------------------------------------
+  # 2. RIPE-like WHOIS options
+  # ----------------------------------------------------------
+  - id: ripe_whois
+    label: "RIPE-style WHOIS Options"
+    description: "Extended WHOIS parameters for RIPE and RIPE-like query syntax."
+    placeholders:
+
+      less_specific_1:
+        type: flag
+        flag: "-l"
+        prompt: "Find one level less specific (-l)"
+
+      less_specific_all:
+        type: flag
+        flag: "-L"
+        prompt: "Find all less specific matches (-L)"
+
+      more_specific_1:
+        type: flag
+        flag: "-m"
+        prompt: "Find one level more specific (-m)"
+
+      more_specific_all:
+        type: flag
+        flag: "-M"
+        prompt: "Find all more specific matches (-M)"
+
+      mnt_irt:
+        type: flag
+        flag: "-c"
+        prompt: "Smallest match containing mnt-irt attribute (-c)"
+
+      exact_match:
+        type: flag
+        flag: "-x"
+        prompt: "Exact match (-x)"
+
+      brief:
+        type: flag
+        flag: "-b"
+        prompt: "Return brief IP ranges with abuse contact (-b)"
+
+      no_filtering:
+        type: flag
+        flag: "-B"
+        prompt: "Turn off object filtering (-B)"
+
+      no_grouping:
+        type: flag
+        flag: "-G"
+        prompt: "Turn off grouping of associated objects (-G)"
+
+      include_dns_reverse:
+        type: flag
+        flag: "-d"
+        prompt: "Return DNS reverse delegation objects (-d)"
+
+      inverse_lookup:
+        type: string
+        flag: "-i"
+        prompt: "Inverse lookup attributes (-i ATTR[,ATTR]...)"
+        allow_empty: true
+
+      type_filter:
+        type: string
+        flag: "-T"
+        prompt: "Search only object types (-T TYPE[,TYPE]...)"
+        allow_empty: true
+
+      primary_keys_only:
+        type: flag
+        flag: "-K"
+        prompt: "Return only primary keys (-K)"
+
+      no_recursive_contacts:
+        type: flag
+        flag: "-r"
+        prompt: "Turn off recursive contact lookups (-r)"
+
+      show_local_copy:
+        type: flag
+        flag: "-R"
+        prompt: "Force local copy even if referral exists (-R)"
+
+      search_all_mirrors:
+        type: flag
+        flag: "-a"
+        prompt: "Search all mirrored databases (-a)"
+
+      source_filter:
+        type: string
+        flag: "-s"
+        prompt: "Source database list (-s SOURCE[,SOURCE]...)"
+        allow_empty: true
+
+      serial_range:
+        type: string
+        flag: "-g"
+        prompt: "Find updates: SOURCE:FIRST-LAST (-g)"
+        allow_empty: true
+
+      request_template:
+        type: string
+        flag: "-t"
+        prompt: "Request object template (-t TYPE)"
+        allow_empty: true
+
+      request_template_verbose:
+        type: string
+        flag: "-v"
+        prompt: "Request verbose object template (-v TYPE)"
+        allow_empty: true
+
+      query_server_info:
+        type: string
+        flag: "-q"
+        prompt: "Query server info: version|sources|types (-q)"
+        allow_empty: true
+
+  # ----------------------------------------------------------
+  # 3. Target/Query object
+  # ----------------------------------------------------------
+  - id: query_object
+    label: "Query Object"
+    description: "The WHOIS object to query (domain, IP, ASN, or handle)."
+    placeholders:
+      object:
+        type: string
+        prompt: "Enter the WHOIS object (domain, IP, ASN, or handle)"
+
+# Global validators
+placeholders_global_validators:
+  validate_port:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_positive_integer
+    message: "Port must be a positive integer."
+
+parsers:
+  - id: parsers.whois_text
+    module: parsers.whois_text
+    description: "Parser for whois textual output."
+
+examples:
+  - label: "Standard domain lookup"
+    command: ["whois", "example.com"]
+
+  - label: "WHOIS on specific server"
+    command: ["whois", "-h", "whois.verisign-grs.com", "example.com"]
+
+  - label: "RIPE inverse lookup"
+    command: ["whois", "-i", "mnt-by", "AS1234"]
+
+notes:
+  - "This manifest covers standard WHOIS flags and RIPE-style extended options."
+  - "The query object (domain, IP, ASN, or handle) should be provided as a required argument."
