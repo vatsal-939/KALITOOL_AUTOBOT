@@ -1,0 +1,228 @@
+# yaml/Sqlmap/sqlmap.yaml
+tool_id: Sqlmap
+command_id: sqlmap
+display_name: sqlmap (sqlmap)
+version: "1.0-manifest"
+description: >
+  sqlmap — automatic SQL injection and database takeover tool.
+  This manifest covers the primary command-line options for `sqlmap`.
+  (Note: sqlmap also provides a separate sqlmapapi/REST interface; this file
+  covers the classic CLI `sqlmap` command.)
+
+category: web_security
+default_output_dir: "reports/sqlmap"
+
+# Logical services (groups) to present to the user
+services:
+
+  - id: global
+    label: "Global / Basic"
+    description: "General flags, version and verbosity."
+    command_template:
+      - "sqlmap"
+      - "{global_flags}"
+      - "{verbosity}"
+      - "{targets}"
+    placeholders:
+      global_flags:
+        type: multi_enum
+        choices:
+          - {id: help, flag: "-h", label: "Help (-h)"}
+          - {id: help_adv, flag: "-hh", label: "Advanced help (-hh)"}
+          - {id: version, flag: "--version", label: "Show version (--version)"}
+          - {id: batch, flag: "--batch", label: "Never ask (automated) (--batch)"}
+          - {id: flush_session, flag: "--flush-session", label: "Flush session files (--flush-session)"}
+          - {id: wizard, flag: "--wizard", label: "Wizard interface (--wizard)"}
+      verbosity:
+        type: enum
+        choices:
+          - {id: v0, flag: "-v", arg: "0", label: "verbosity 0"}
+          - {id: v1, flag: "-v", arg: "1", label: "verbosity 1 (default)"}
+          - {id: v2, flag: "-v", arg: "2", label: "verbosity 2"}
+          - {id: v3, flag: "-v", arg: "3", label: "verbosity 3"}
+          - {id: v4, flag: "-v", arg: "4", label: "verbosity 4"}
+          - {id: v5, flag: "-v", arg: "5", label: "verbosity 5"}
+          - {id: v6, flag: "-v", arg: "6", label: "verbosity 6"}
+      targets:
+        type: multi_enum
+        choices:
+          - {id: url, flag: "-u", arg: "URL", label: "Target URL (-u <url>)"}
+          - {id: googledork, flag: "-g", arg: "GOOGLEDORK", label: "Google dork results (-g <dork>)"}
+
+    parser: parsers.sqlmap_text
+    risk_level: low
+
+  - id: request
+    label: "Request options"
+    description: "HTTP request modification and proxy/Tor options."
+    command_template:
+      - "sqlmap"
+      - "{request_flags}"
+      - "{targets}"
+    placeholders:
+      request_flags:
+        type: multi_enum
+        choices:
+          - {id: data, flag: "--data", arg: "DATA", label: "POST data string (--data <DATA>)"}
+          - {id: cookie, flag: "--cookie", arg: "COOKIE", label: "Cookie header (--cookie <COOKIE>)"}
+          - {id: random_agent, flag: "--random-agent", label: "Random User-Agent (--random-agent)"}
+          - {id: proxy, flag: "--proxy", arg: "PROXY", label: "Use proxy (--proxy <PROXY>)"}
+          - {id: tor, flag: "--tor", label: "Use Tor (--tor)"}
+          - {id: check_tor, flag: "--check-tor", label: "Check Tor (--check-tor)"}
+
+    parser: parsers.sqlmap_text
+    risk_level: low
+
+  - id: injection
+    label: "Injection targets & payloads"
+    description: "Parameter selection, DBMS forcing and custom payloads."
+    command_template:
+      - "sqlmap"
+      - "{injection_flags}"
+      - "{targets}"
+    placeholders:
+      injection_flags:
+        type: multi_enum
+        choices:
+          - {id: param, flag: "-p", arg: "TESTPARAM", label: "Test parameter(s) (-p <param>)"}
+          - {id: dbms, flag: "--dbms", arg: "DBMS", label: "Force DBMS type (--dbms <DBMS>)"}
+          - {id: tamper, flag: "--tamper", arg: "scripts", label: "Tamper script(s) (--tamper <script1,...>)"}
+
+    parser: parsers.sqlmap_text
+    risk_level: medium
+
+  - id: detection
+    label: "Detection / Scan tuning"
+    description: "Tweak level and risk of tests."
+    command_template:
+      - "sqlmap"
+      - "{detection_flags}"
+      - "{targets}"
+    placeholders:
+      detection_flags:
+        type: multi_enum
+        choices:
+          - {id: level, flag: "--level", arg: "LEVEL", label: "Level of tests (1-5) (--level <n>)"}
+          - {id: risk, flag: "--risk", arg: "RISK", label: "Risk of tests (1-3) (--risk <n>)"}
+
+    parser: parsers.sqlmap_text
+    risk_level: low
+
+  - id: techniques
+    label: "Techniques"
+    description: "Choose SQL injection techniques to use."
+    command_template:
+      - "sqlmap"
+      - "{technique_flags}"
+      - "{targets}"
+    placeholders:
+      technique_flags:
+        type: enum
+        choices:
+          - {id: default, flag: "--technique", arg: "TECH", label: "Techniques (e.g., BEUSTQ) (--technique <letters>)"}
+          - {id: all, flag: "--technique", arg: "ALL", label: "Specify multiple technique letters"}
+
+    parser: parsers.sqlmap_text
+    risk_level: medium
+
+  - id: enumeration
+    label: "Enumeration options"
+    description: "Retrieve DBMS information, schema and content."
+    command_template:
+      - "sqlmap"
+      - "{enum_flags}"
+      - "{enum_args}"
+      - "{targets}"
+    placeholders:
+      enum_flags:
+        type: multi_enum
+        choices:
+          - {id: all, flag: "-a", label: "Retrieve everything (-a)"}
+          - {id: banner, flag: "-b", label: "Retrieve DBMS banner (-b)"}
+          - {id: current_user, flag: "--current-user", label: "Current DBMS user (--current-user)"}
+          - {id: current_db, flag: "--current-db", label: "Current DBMS database (--current-db)"}
+          - {id: passwords, flag: "--passwords", label: "Enumerate password hashes (--passwords)"}
+          - {id: dbs, flag: "--dbs", label: "Enumerate databases (--dbs)"}
+          - {id: tables, flag: "--tables", label: "Enumerate tables (--tables)"}
+          - {id: columns, flag: "--columns", label: "Enumerate columns (--columns)"}
+          - {id: schema, flag: "--schema", label: "Enumerate schema (--schema)"}
+          - {id: dump, flag: "--dump", label: "Dump table entries (--dump)"}
+          - {id: dump_all, flag: "--dump-all", label: "Dump all databases (--dump-all)"}
+      enum_args:
+        type: multi_enum
+        choices:
+          - {id: db, flag: "-D", arg: "DB", label: "Database to enumerate (-D <DB>)"}
+          - {id: table, flag: "-T", arg: "TBL", label: "Table(s) (-T <tbl>)"}
+          - {id: column, flag: "-C", arg: "COL", label: "Column(s) (-C <col>)"}
+
+    parser: parsers.sqlmap_text
+    risk_level: high
+
+  - id: os_access
+    label: "Operating system access"
+    description: "Options for getting OS-level access via the DBMS host."
+    command_template:
+      - "sqlmap"
+      - "{os_flags}"
+      - "{targets}"
+    placeholders:
+      os_flags:
+        type: multi_enum
+        choices:
+          - {id: os_shell, flag: "--os-shell", label: "Interactive OS shell (--os-shell)", risk: high}
+          - {id: os_pwn, flag: "--os-pwn", label: "Out-of-band shell / Meterpreter / VNC (--os-pwn)", risk: high}
+
+    parser: parsers.sqlmap_text
+    risk_level: high
+    requires_scope_confirmation: true
+
+  - id: output_and_misc
+    label: "Output & Misc"
+    description: "General working parameters and miscellaneous options."
+    command_template:
+      - "sqlmap"
+      - "{misc_flags}"
+      - "{targets}"
+    placeholders:
+      misc_flags:
+        type: multi_enum
+        choices:
+          - {id: batch, flag: "--batch", label: "Never ask (--batch)"}
+          - {id: flush_session, flag: "--flush-session", label: "Flush session (--flush-session)"}
+          - {id: wizard, flag: "--wizard", label: "Wizard interface (--wizard)"}
+
+    parser: parsers.sqlmap_text
+    risk_level: low
+
+# Global validators referenced by placeholders
+placeholders_global_validators:
+  validate_url:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_url
+    message: "Enter a valid URL."
+  validate_non_empty:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_non_empty
+    message: "Value cannot be empty."
+  validate_n_int:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_integer
+    message: "Enter a valid integer."
+
+parsers:
+  - id: parsers.sqlmap_text
+    module: parsers.sqlmap_text
+    description: "Parser for sqlmap textual output (used to capture progress and results)."
+
+examples:
+  - label: "Basic detection against a URL"
+    command: ["sqlmap", "-u", "http://testphp.vuln/bug.php?id=1", "--dbs"]
+  - label: "Dump table rows for given DB and table"
+    command: ["sqlmap", "-u", "http://site/vuln.php?id=1", "-D", "employees", "-T", "users", "--dump"]
+
+notes:
+  - "This manifest models the most commonly used sqlmap CLI options. For full coverage consider adding many advanced flags available in sqlmap's extended help."
+  - "High-risk actions (database dumps, os-shell, os-pwn) should only be executed with explicit authorization. The adapter/engine should require an explicit confirmation step for 'risk: high' choices."

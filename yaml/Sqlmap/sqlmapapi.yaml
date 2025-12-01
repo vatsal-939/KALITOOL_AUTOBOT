@@ -1,0 +1,105 @@
+# yaml/Sqlmap/sqlmapapi.yaml
+tool_id: Sqlmap
+command_id: sqlmapapi
+display_name: sqlmapapi (sqlmapapi)
+version: "1.0-manifest"
+description: >
+  sqlmapapi — REST-JSON API server/client for sqlmap. Can run as a server to accept
+  jobs via HTTP or as a client to interact with a running sqlmapapi server.
+
+category: web_security
+default_output_dir: "reports/sqlmapapi"
+
+services:
+
+  - id: mode
+    label: "Mode (server or client)"
+    description: "Run sqlmapapi in server or client mode."
+    command_template:
+      - "sqlmapapi"
+      - "{mode_flag}"
+      - "{host_and_port}"
+      - "{adapter}"
+      - "{database}"
+      - "{auth}"
+    placeholders:
+      mode_flag:
+        type: enum
+        choices:
+          - {id: server, flag: "-s", value: "--server", label: "Run as API server (-s / --server)"}
+          - {id: client, flag: "-c", value: "--client", label: "Run as API client (-c / --client)"}
+      host_and_port:
+        type: multi_enum
+        choices:
+          - {id: host, flag: "-H", arg: "HOST", label: "API server host (-H <HOST>)", default: "127.0.0.1"}
+          - {id: port, flag: "-p", arg: "PORT", label: "API server port (-p <PORT>)", default: "8775"}
+      adapter:
+        type: enum
+        choices:
+          - {id: default_adapter, flag: "--adapter", arg: "ADAPTER", label: "Adapter to use (bottle adapter) (--adapter <ADAPTER>)", value: "wsgiref"}
+      database:
+        type: string
+        choices: []
+        prompt: "IPC database filepath (optional)"
+        description: "Set IPC database filepath (optional) (--database <DATABASE>)"
+        flag: "--database"
+      auth:
+        type: multi_enum
+        choices:
+          - {id: username, flag: "--username", arg: "USERNAME", label: "Basic auth username (--username <USERNAME>)"}
+          - {id: password, flag: "--password", arg: "PASSWORD", label: "Basic auth password (--password <PASSWORD>)"}
+
+    parser: parsers.sqlmapapi_json
+    risk_level: low
+
+  - id: misc
+    label: "Misc / Help"
+    description: "Help and version information"
+    command_template:
+      - "sqlmapapi"
+      - "{misc_flags}"
+    placeholders:
+      misc_flags:
+        type: multi_enum
+        choices:
+          - {id: help, flag: "-h", label: "Show help (-h / --help)"}
+
+placeholders_global_validators:
+  validate_host:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_host_or_ip
+    message: "Enter a valid hostname or IP address."
+  validate_port:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_port
+    message: "Enter a valid port number (1-65535)."
+  validate_file_exists:
+    type: python_callable
+    module: validators.file_validators
+    func: validate_file_exists
+    message: "File not found (for --database filepath)."
+  validate_non_empty:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_non_empty
+    message: "Value cannot be empty."
+
+parsers:
+  - id: parsers.sqlmapapi_json
+    module: parsers.sqlmapapi_json
+    description: "Parser for sqlmapapi JSON responses (used by client mode)."
+
+examples:
+  - label: "Run sqlmapapi server on default host/port"
+    command: ["sqlmapapi","-s"]
+  - label: "Run sqlmapapi server on custom host/port with adapter"
+    command: ["sqlmapapi","-s","-H","0.0.0.0","-p","8776","--adapter","wsgiref"]
+  - label: "Run client connecting to specific host/port"
+    command: ["sqlmapapi","-c","-H","127.0.0.1","-p","8775"]
+
+notes:
+  - "When running in server mode (-s) the process will listen for HTTP job submissions."
+  - "If you provide --database, ensure the sqlmapapi process has write permissions to the path."
+  - "Use --username and --password to enable basic HTTP authentication for the API (client must supply matching creds)."

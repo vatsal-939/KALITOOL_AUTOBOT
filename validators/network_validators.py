@@ -11,6 +11,7 @@ Common network-related validators used by manifests:
 - validate_port
 - validate_port_optional
 - validate_host_or_path (for unix socket paths)
+- validate_url
 Each validator raises ValueError with a helpful message if validation fails,
 otherwise returns True (or normalized value where noted).
 """
@@ -19,6 +20,7 @@ import ipaddress
 import re
 import os
 from typing import Tuple
+from urllib.parse import urlparse
 
 # hostname pattern: allow letters, digits, hyphen and dot (simple)
 _HOSTNAME_RE = re.compile(r"^(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*(?:[A-Za-z0-9\-]{1,63})$")
@@ -124,3 +126,49 @@ def validate_hostport_or_port(value: str) -> bool:
     if ":" in value:
         return validate_host_and_port(value)
     return validate_port(value)
+
+
+def validate_url(value: str) -> bool:
+    """
+    Validate that the input is a valid URL.
+    Accepts URLs with schemes like http, https, ftp, file, etc.
+    Requires a scheme and network location (netloc) or valid file path.
+    """
+    if not value or not isinstance(value, str):
+        raise ValueError(f"Invalid URL: '{value}' (must be a non-empty string)")
+    
+    # Parse the URL
+    parsed = urlparse(value)
+    
+    # Check for a valid scheme (http, https, ftp, file, etc.)
+    if not parsed.scheme:
+        raise ValueError(f"Invalid URL: '{value}' (missing scheme like http:// or https://)")
+    
+    # Check that the scheme is valid (alphanumeric characters and +.-)
+    if not re.match(r'^[a-zA-Z][a-zA-Z0-9+.-]*$', parsed.scheme):
+        raise ValueError(f"Invalid URL: '{value}' (invalid scheme: '{parsed.scheme}')")
+    
+    # For file:// URLs, validate the path exists or is a valid path format
+    if parsed.scheme == 'file':
+        # File URLs don't require netloc, just a valid path
+        if not parsed.path:
+            raise ValueError(f"Invalid file URL: '{value}' (missing path)")
+        return True
+    
+    # For other schemes, require netloc (network location: hostname/IP with optional port)
+    if not parsed.netloc:
+        raise ValueError(f"Invalid URL: '{value}' (missing network location/hostname)")
+    
+    # Extract hostname from netloc (remove port if present)
+    hostname = parsed.netloc.split(':')[0]
+    
+    # Validate hostname or IP
+    try:
+        validate_ip(hostname)
+    except ValueError:
+        try:
+            validate_hostname(hostname)
+        except ValueError:
+            raise ValueError(f"Invalid URL: '{value}' (invalid hostname: '{hostname}')")
+    
+    return True

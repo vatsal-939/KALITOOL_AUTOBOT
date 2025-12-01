@@ -33,3 +33,9 @@
 2025-12-01 20:07:22 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd
 2025-12-01 20:08:33 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd
 2025-12-01 20:08:50 | INFO     | KaliToolAutoBot | Loaded manifest for Whois/mkpasswd
+2025-12-01 20:20:26 | INFO     | KaliToolAutoBot | Loaded manifest for Sqlmap/sqlmap
+2025-12-01 20:23:37 | ERROR    | KaliToolAutoBot | Adapter error: module 'validators.network_validators' has no attribute 'validate_url'
+2025-12-01 20:24:34 | INFO     | KaliToolAutoBot | Loaded manifest for Sqlmap/sqlmap
+2025-12-01 20:30:27 | INFO     | KaliToolAutoBot | Loaded manifest for Sqlmap/sqlmap
+2025-12-01 20:30:48 | ERROR    | KaliToolAutoBot | Adapter error: module 'validators.network_validators' has no attribute 'validate_url'
+2025-12-01 20:57:06 | INFO     | KaliToolAutoBot | Loaded manifest for Sqlmap/sqlmap
