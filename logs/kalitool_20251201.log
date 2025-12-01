@@ -16,3 +16,8 @@
 2025-12-01 18:53:36 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
 2025-12-01 19:02:48 | INFO     | KaliToolAutoBot | Loaded manifest for Ffuf/ffuf
 2025-12-01 19:04:11 | INFO     | KaliToolAutoBot | Loaded manifest for Ffuf/ffuf
+2025-12-01 19:16:45 | INFO     | KaliToolAutoBot | Loaded manifest for Ffuf/ffuf
+2025-12-01 19:16:52 | INFO     | KaliToolAutoBot | Loaded manifest for Masscan/masscan
+2025-12-01 19:23:07 | INFO     | KaliToolAutoBot | Loaded manifest for Masscan/masscan
+2025-12-01 19:24:05 | INFO     | tools.Masscan.masscan_adapter | Executing: masscan -p 8080,9090
+2025-12-01 19:24:05 | ERROR    | tools.Masscan.masscan_adapter | masscan binary not found in PATH.

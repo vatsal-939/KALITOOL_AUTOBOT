@@ -1,0 +1,306 @@
+# yaml/Masscan/masscan.yaml
+tool_id: Masscan
+command_id: masscan
+display_name: masscan (Masscan)
+version: "1.0-manifest"
+description: >
+  Masscan — very fast port scanner. Primary inputs: targets (IPs/CIDR/ranges)
+  and ports. This manifest covers target specification, ports, adapter/network
+  settings, rate/timing, output formats, configuration file usage, and misc flags.
+
+category: network_scanning
+default_output_dir: "reports/masscan"
+
+services:
+
+  - id: targets
+    label: "Target specification"
+    description: "Specify targets to scan (hosts, networks, ranges, input-file)."
+    command_template:
+      - "masscan"
+      - "{targets}"
+      - "{ports}"
+      - "{common_flags}"
+    placeholders:
+      targets:
+        type: target_multi
+        prompt: "Targets (hostname, IP, CIDR, range, or comma/space-separated list)"
+      input_file:
+        type: filepath
+        flag: "-iL"
+        prompt: "Read targets from file (config-style)"
+        description: "Input filename containing target list (-iL <file>)"
+        required: false
+
+  - id: ports
+    label: "Port specification"
+    description: "Ports to scan (single, list or ranges)."
+    command_template:
+      - "masscan"
+      - "{targets}"
+      - "{port_flag}"
+      - "{port_spec}"
+    placeholders:
+      port_flag:
+        type: enum
+        choices:
+          - {id: short, flag: "-p", label: "Short form (-p)"}
+          - {id: long, flag: "--ports", label: "Long form (--ports)"}
+      port_spec:
+        type: string
+        prompt: "Port spec (e.g. 80,443,1-65535 or U:53 for UDP)"
+        description: "Ports or ranges (comma-separated or dash ranges)"
+        validators: ["validate_port_spec"]
+
+  - id: adapter_network
+    label: "Adapter / Network / Spoofing"
+    description: "Network interface and spoofing controls."
+    command_template:
+      - "masscan"
+      - "{adapter_flags}"
+      - "{targets}"
+      - "{ports}"
+    placeholders:
+      adapter_ip:
+        type: string
+        flag: "--adapter-ip"
+        prompt: "Set adapter IP (e.g. 192.168.10.123)"
+        validators: ["validate_ip"]
+      adapter_mac:
+        type: string
+        flag: "--adapter-mac"
+        prompt: "Set adapter MAC (e.g. 00-11-22-33-44-55)"
+        validators: ["validate_mac"]
+      router_mac:
+        type: string
+        flag: "--router-mac"
+        prompt: "Set router MAC (e.g. 66-55-44-33-22-11)"
+        validators: ["validate_mac"]
+      source_ip:
+        type: string
+        flag: "--source-ip"
+        prompt: "Spoof source IP (if supported)"
+        validators: ["validate_ip"]
+      source_port:
+        type: string
+        flag: "--source-port"
+        prompt: "Spoof source port (e.g. 12345)"
+        validators: ["validate_port"]
+
+  - id: rate_timing
+    label: "Rate & timing controls"
+    description: "Control how fast masscan sends packets and timeouts."
+    command_template:
+      - "masscan"
+      - "{targets}"
+      - "{ports}"
+      - "{rate_flags}"
+    placeholders:
+      rate:
+        type: numeric
+        flag: "--rate"
+        prompt: "Packets per second (rate) (e.g. 1000)"
+        validators: ["validate_positive_integer"]
+      wait:
+        type: string
+        flag: "--wait"
+        prompt: "Wait time between retries or events (if supported)"
+      max_rate:
+        type: numeric
+        flag: "--max-rate"
+        prompt: "Max packets per second (if supported)"
+        validators: ["validate_positive_integer"]
+
+  - id: output
+    label: "Output / Logging"
+    description: "Control output format(s) and files."
+    command_template:
+      - "masscan"
+      - "{targets}"
+      - "{ports}"
+      - "{output_flags}"
+    placeholders:
+      out_xml:
+        type: filepath
+        flag: "-oX"
+        prompt: "Write XML output to file (-oX <file>)"
+      out_grep:
+        type: filepath
+        flag: "-oG"
+        prompt: "Write grepable output to file (-oG <file>)"
+      out_json:
+        type: filepath
+        flag: "-oJ"
+        prompt: "Write JSON output to file (-oJ <file>)"
+      out_list:
+        type: filepath
+        flag: "-oL"
+        prompt: "Write list output to file (-oL <file>)"
+      out_binary:
+        type: filepath
+        flag: "-oB"
+        prompt: "Write binary output file (-oB <file>)"
+      echo:
+        type: flag
+        flag: "--echo"
+        prompt: "Echo configuration instead of running (--echo)"
+
+  - id: config_file
+    label: "Configuration file"
+    description: "Load options from a config file or save current config to a file."
+    command_template:
+      - "masscan"
+      - "{config_flags}"
+      - "{targets}"
+      - "{ports}"
+    placeholders:
+      config_file:
+        type: filepath
+        flag: "-c"
+        prompt: "Load parameters from config file (-c <file>)"
+      echo_config:
+        type: flag
+        flag: "--echo"
+        prompt: "Echo current config and exit (--echo)"
+      save_config:
+        type: string
+        flag: "--echo-file"
+        prompt: "Generate config file from current settings and write to file (if supported)"
+
+  - id: scan_control
+    label: "Scan control / resume / shards"
+    description: "Control scan resume, shards, and paused runs."
+    command_template:
+      - "masscan"
+      - "{targets}"
+      - "{ports}"
+      - "{scan_control_flags}"
+    placeholders:
+      resume:
+        type: flag
+        flag: "--resume"
+        prompt: "Resume from previous scan state (--resume)"
+      resume_from:
+        type: filepath
+        flag: "--resume-from"
+        prompt: "Resume from a specific file (--resume-from <file>)"
+      shard:
+        type: string
+        flag: "--shard"
+        prompt: "Shard spec (N/M) to split scans for distributed scanning (--shard N/M)"
+
+  - id: probing
+    label: "Probing / Banner grabbing"
+    description: "Service interrogation and payload/banners collection."
+    command_template:
+      - "masscan"
+      - "{targets}"
+      - "{ports}"
+      - "{probe_flags}"
+    placeholders:
+      banners:
+        type: flag
+        flag: "--banners"
+        prompt: "Grab service banners (--banners)"
+      probe_payload:
+        type: string
+        flag: "--probe-payload"
+        prompt: "Custom probe payload (if supported) (--probe-payload <hex/text>)"
+      probe_delay:
+        type: numeric
+        flag: "--probe-delay"
+        prompt: "Delay between probe packets (ms)"
+
+  - id: interface_control
+    label: "Interface / adapter control"
+    description: "Manually set adapter if auto-detect fails."
+    command_template:
+      - "masscan"
+      - "{adapter_flags}"
+      - "{targets}"
+      - "{ports}"
+    placeholders:
+      iface:
+        type: string
+        flag: "--interface"
+        prompt: "Network interface to use (e.g., eth0)"
+      adapter_ip:
+        type: string
+        flag: "--adapter-ip"
+        prompt: "Adapter IP (e.g., 192.168.10.123)"
+      adapter_mac:
+        type: string
+        flag: "--adapter-mac"
+        prompt: "Adapter MAC (e.g., 00-11-22-33-44-55)"
+      router_mac:
+        type: string
+        flag: "--router-mac"
+        prompt: "Router MAC (e.g., 66-55-44-33-22-11)"
+
+  - id: misc
+    label: "Misc / Help / Version"
+    description: "Miscellaneous flags like help and version."
+    command_template:
+      - "masscan"
+      - "{misc_flags}"
+      - "{targets}"
+      - "{ports}"
+    placeholders:
+      help:
+        type: flag
+        flag: "-h"
+        prompt: "Show help (-h)"
+      version:
+        type: flag
+        flag: "--version"
+        prompt: "Show version (--version)"
+      quiet:
+        type: flag
+        flag: "--quiet"
+        prompt: "Quiet mode (suppress non-essential stdout)"
+
+# Global validators referenced by placeholders
+placeholders_global_validators:
+  validate_ip:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_ip
+    message: "Enter a valid IPv4/IPv6 address."
+  validate_mac:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_mac
+    message: "Enter a valid MAC address (format: XX-XX-XX-XX-XX-XX)."
+  validate_port:
+    type: python_callable
+    module: validators.network_validators
+    func: validate_port
+    message: "Enter a valid port (1-65535)."
+  validate_port_spec:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_port_range
+    message: "Enter a valid port list or range (e.g., 22,80,1-1024)."
+  validate_positive_integer:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_positive_integer
+    message: "Enter a positive integer."
+
+parsers:
+  - id: parsers.masscan_text
+    module: parsers.masscan_text
+    description: "Parser to convert masscan textual output into structured results."
+
+examples:
+  - label: "Scan 10.0.0.0/8 for HTTP (fast example)"
+    command: ["masscan","10.0.0.0/8","-p80","--rate","1000"]
+  - label: "Scan with adapter overrides and echo config"
+    command: ["masscan","10.0.0.0/8","-p80","--adapter-ip","192.168.10.123","--adapter-mac","00-11-22-33-44-55","--echo"]
+  - label: "Read targets from file and output JSON"
+    command: ["masscan","-iL","targets.txt","-p80","-oJ","out.json"]
+
+notes:
+  - "This manifest groups Masscan options into logical sections for interactive prompting."
+  - "Masscan supports many flags and config-file semantics; if you need a one-to-one mapping of every flag from your installed Masscan version, request a full dump and I will convert them into individual placeholders."
+  - "Be careful when using high --rate values or spoofing options — require explicit authorization and scope confirmation in your engine before running."
