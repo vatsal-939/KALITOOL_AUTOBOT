@@ -1,0 +1,379 @@
+# yaml/Ffuf/ffuf.yaml
+tool_id: Ffuf
+command_id: ffuf
+display_name: ffuf (Fuzz Faster U Fool)
+version: "2.1.0-manifest"
+description: >
+  ffuf — fast web fuzzer. This manifest maps ffuf's command-line flags into
+  logical groups for interactive prompting. It covers HTTP options, general
+  controls, matchers, filters, input sources, and output options.
+
+category: web_fuzzing
+default_output_dir: "reports/ffuf"
+
+services:
+
+  - id: http_options
+    label: "HTTP OPTIONS"
+    description: "HTTP request options, headers, method, payloads, recursion and request-level controls."
+    command_template:
+      - "ffuf"
+      - "{http_flags}"
+      - "{target}"
+    placeholders:
+      header:
+        type: multi_enum
+        choices:
+          - {id: header, flag: "-H", arg: "HEADER", label: "Header 'Name: Value' (-H 'Name: Value')"}
+      method:
+        type: enum
+        choices:
+          - {id: method, flag: "-X", arg: "METHOD", label: "HTTP method to use (-X METHOD)"}
+      cookie:
+        type: string
+        flag: "-b"
+        prompt: "Cookie data (e.g. 'NAME1=VALUE1; NAME2=VALUE2')"
+      client_cert:
+        type: string
+        flag: "-cc"
+        prompt: "Client cert path for authentication (-cc <file>)"
+      client_key:
+        type: string
+        flag: "-ck"
+        prompt: "Client key path for authentication (-ck <file>)"
+      post_data:
+        type: string
+        flag: "-d"
+        prompt: "POST data payload (-d '<data>')"
+      http2:
+        type: flag
+        flag: "-http2"
+        prompt: "Use HTTP2 protocol (-http2)"
+      ignore_body:
+        type: flag
+        flag: "-ignore-body"
+        prompt: "Do not fetch response body (-ignore-body)"
+      follow_redirects:
+        type: flag
+        flag: "-r"
+        prompt: "Follow redirects (-r)"
+      raw_uri:
+        type: flag
+        flag: "-raw"
+        prompt: "Do not encode URI (-raw)"
+      recursion:
+        type: flag
+        flag: "-recursion"
+        prompt: "Enable recursion (URL must end with FUZZ and only FUZZ supported)"
+      recursion_depth:
+        type: numeric
+        flag: "-recursion-depth"
+        prompt: "Maximum recursion depth (-recursion-depth N)"
+      recursion_strategy:
+        type: enum
+        flag: "-recursion-strategy"
+        choices:
+          - {id: default, arg: "default", label: "default (redirect-based)"}
+          - {id: greedy, arg: "greedy", label: "greedy (recurse on all matches)"}
+      replay_proxy:
+        type: string
+        flag: "-replay-proxy"
+        prompt: "Replay matched requests using this proxy (-replay-proxy <proxy_url>)"
+      sni:
+        type: string
+        flag: "-sni"
+        prompt: "Target TLS SNI (-sni <name>)"
+      timeout:
+        type: numeric
+        flag: "-timeout"
+        prompt: "HTTP request timeout seconds (-timeout <sec>)"
+      url:
+        type: string
+        flag: "-u"
+        prompt: "Target URL (-u <url>)"
+      proxy:
+        type: string
+        flag: "-x"
+        prompt: "Proxy URL (http:// or socks5://) (-x <proxy_url>)"
+
+  - id: general_options
+    label: "GENERAL OPTIONS"
+    description: "Global behavior and runtime controls."
+    command_template:
+      - "ffuf"
+      - "{general_flags}"
+      - "{input_flags}"
+      - "{output_flags}"
+    placeholders:
+      version:
+        type: flag
+        flag: "-V"
+        prompt: "Show version (-V)"
+      autocalibrate:
+        type: flag
+        flag: "-ac"
+        prompt: "Automatically calibrate filtering (-ac)"
+      autocalibrate_custom:
+        type: multi_enum
+        choices:
+          - {id: acc, flag: "-acc", arg: "STRING", label: "Custom autocalibration string (-acc <str>)"}
+          - {id: acs, flag: "-acs", arg: "STR", label: "Custom auto-calibration strategies (-acs <str>)"}
+      perhost_autocal:
+        type: flag
+        flag: "-ach"
+        prompt: "Per-host autocalibration (-ach)"
+      autocal_keyword:
+        type: string
+        flag: "-ack"
+        prompt: "Autocalibration keyword (default FUZZ) (-ack <keyword>)"
+      colorize:
+        type: flag
+        flag: "-c"
+        prompt: "Colorize output (-c)"
+      config_file:
+        type: string
+        flag: "-config"
+        prompt: "Load config from file (-config <file>)"
+      json_out:
+        type: flag
+        flag: "-json"
+        prompt: "JSON output (newline-delimited) (-json)"
+      maxtime:
+        type: numeric
+        flag: "-maxtime"
+        prompt: "Maximum running time seconds (-maxtime <sec>)"
+      maxtime_job:
+        type: numeric
+        flag: "-maxtime-job"
+        prompt: "Max running time per job seconds (-maxtime-job <sec>)"
+      noninteractive:
+        type: flag
+        flag: "-noninteractive"
+        prompt: "Disable interactive console (-noninteractive)"
+      delay:
+        type: string
+        flag: "-p"
+        prompt: "Delay between requests seconds or range (-p 0.1 or 0.1-2.0)"
+      rate:
+        type: numeric
+        flag: "-rate"
+        prompt: "Requests per second (-rate <num>)"
+      silent:
+        type: flag
+        flag: "-s"
+        prompt: "Silent mode; do not print additional info (-s)"
+      stop_all_errors:
+        type: flag
+        flag: "-sa"
+        prompt: "Stop on all error cases (-sa)"
+      scraperfile:
+        type: string
+        flag: "-scraperfile"
+        prompt: "Custom scraper file path (-scraperfile <path>)"
+      scrapers:
+        type: string
+        flag: "-scrapers"
+        prompt: "Active scraper groups (-scrapers <list>)"
+      stop_spurious:
+        type: flag
+        flag: "-se"
+        prompt: "Stop on spurious errors (-se)"
+      search_history:
+        type: string
+        flag: "-search"
+        prompt: "Search FFUFHASH from history (-search <hash>)"
+      stop_on_403:
+        type: flag
+        flag: "-sf"
+        prompt: "Stop when >95% responses are 403 (-sf)"
+      threads:
+        type: numeric
+        flag: "-t"
+        prompt: "Number of concurrent threads (-t <num>)"
+      verbose:
+        type: flag
+        flag: "-v"
+        prompt: "Verbose output (-v)"
+
+  - id: matcher_options
+    label: "MATCHER OPTIONS"
+    description: "Rules to select matches from responses."
+    placeholders:
+      match_codes:
+        type: string
+        flag: "-mc"
+        prompt: "Match HTTP status codes or 'all' (-mc <codes/ranges>)"
+      match_lines:
+        type: string
+        flag: "-ml"
+        prompt: "Match number of lines in response (-ml <num>)"
+      match_mode:
+        type: enum
+        flag: "-mmode"
+        choices:
+          - {id: or, arg: "or", label: "or (default)"}
+          - {id: and, arg: "and", label: "and"}
+      match_regex:
+        type: string
+        flag: "-mr"
+        prompt: "Match regexp (-mr <regex>)"
+      match_size:
+        type: string
+        flag: "-ms"
+        prompt: "Match response size (-ms <size>)"
+      match_time:
+        type: string
+        flag: "-mt"
+        prompt: "Match time to first byte condition (e.g. >100, <100)"
+      match_words:
+        type: string
+        flag: "-mw"
+        prompt: "Match number of words (-mw <num>)"
+
+  - id: filter_options
+    label: "FILTER OPTIONS"
+    description: "Filters to exclude responses from results."
+    placeholders:
+      filter_codes:
+        type: string
+        flag: "-fc"
+        prompt: "Filter HTTP status codes (comma separated/ranges) (-fc <codes>)"
+      filter_lines:
+        type: string
+        flag: "-fl"
+        prompt: "Filter by amount of lines (-fl <list/ranges>)"
+      filter_mode:
+        type: enum
+        flag: "-fmode"
+        choices:
+          - {id: or, arg: "or", label: "or (default)"}
+          - {id: and, arg: "and", label: "and"}
+      filter_regex:
+        type: string
+        flag: "-fr"
+        prompt: "Filter regexp (-fr <regex>)"
+      filter_size:
+        type: string
+        flag: "-fs"
+        prompt: "Filter response size (-fs <sizes>)"
+      filter_time:
+        type: string
+        flag: "-ft"
+        prompt: "Filter by time to first byte (e.g. >100) (-ft <cond>)"
+      filter_words:
+        type: string
+        flag: "-fw"
+        prompt: "Filter by number of words (-fw <list/ranges>)"
+
+  - id: input_options
+    label: "INPUT OPTIONS"
+    description: "Wordlist/input sources, encoders, modes, raw requests and input command options."
+    placeholders:
+      dirsearch_mode:
+        type: flag
+        flag: "-D"
+        prompt: "DirSearch compatibility mode (-D)"
+      extensions:
+        type: string
+        flag: "-e"
+        prompt: "Comma separated extensions to extend FUZZ (-e jpg,php)"
+      encoders:
+        type: string
+        flag: "-enc"
+        prompt: "Encoders for keywords (e.g. 'FUZZ:urlencode b64encode')"
+      ignore_comments:
+        type: flag
+        flag: "-ic"
+        prompt: "Ignore wordlist comments (-ic)"
+      input_cmd:
+        type: string
+        flag: "-input-cmd"
+        prompt: "Command producing input (overrides -w) (-input-cmd '<cmd>')"
+      input_num:
+        type: numeric
+        flag: "-input-num"
+        prompt: "Number of inputs to test when using --input-cmd (-input-num <n>)"
+      input_shell:
+        type: string
+        flag: "-input-shell"
+        prompt: "Shell to use for running input command (-input-shell <shell>)"
+      mode:
+        type: enum
+        flag: "-mode"
+        choices:
+          - {id: clusterbomb, arg: "clusterbomb", label: "clusterbomb"}
+          - {id: pitchfork, arg: "pitchfork", label: "pitchfork"}
+          - {id: sniper, arg: "sniper", label: "sniper"}
+      raw_request:
+        type: string
+        flag: "-request"
+        prompt: "File containing raw HTTP request (-request <file>)"
+      request_proto:
+        type: string
+        flag: "-request-proto"
+        prompt: "Protocol for raw request (http or https) (-request-proto <proto>)"
+      wordlist:
+        type: string
+        flag: "-w"
+        prompt: "Wordlist file path and optional keyword (e.g. '/path/wordlist:KEYWORD') (-w <file[:KEY]>)"
+
+  - id: output_options
+    label: "OUTPUT OPTIONS"
+    description: "Controls how results are written and logging." 
+    placeholders:
+      debug_log:
+        type: string
+        flag: "-debug-log"
+        prompt: "Write internal logging to file (-debug-log <file>)"
+      output_file:
+        type: string
+        flag: "-o"
+        prompt: "Write main output to file (-o <file>)"
+      output_dir:
+        type: string
+        flag: "-od"
+        prompt: "Directory to store matched results (-od <dir>)"
+      output_format:
+        type: string
+        flag: "-of"
+        prompt: "Output file format(s): json,ejson,html,md,csv,ecsv or 'all' (-of <format>)"
+      output_require_results:
+        type: flag
+        flag: "-or"
+        prompt: "Don't create output file if there are no results (-or)"
+
+# Global validators
+placeholders_global_validators:
+  validate_file_exists:
+    type: python_callable
+    module: validators.file_validators
+    func: validate_file_exists
+    message: "File not found."
+  validate_numeric:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_positive_integer
+    message: "Enter a positive integer."
+  validate_timeout:
+    type: python_callable
+    module: validators.input_validators
+    func: validate_time_like
+    message: "Enter a valid time or float (e.g., 0.1, 2)."
+
+parsers:
+  - id: parsers.ffuf_json
+    module: parsers.ffuf_json
+    description: "Parser for ffuf JSON or structured output."
+
+examples:
+  - label: "Fuzz file paths and filter those with content-size not 42"
+    command: ['ffuf','-w','wordlist.txt','-u','https://example.org/FUZZ','-mc','all','-fs','42','-c','-v']
+  - label: "Fuzz Host-header using hosts list"
+    command: ['ffuf','-w','hosts.txt','-u','https://example.org/','-H','Host: FUZZ','-mc','200']
+  - label: "Fuzz POST JSON and filter out 'error' occurrences"
+    command: ['ffuf','-w','entries.txt','-u','https://example.org/','-X','POST','-H','Content-Type: application/json','-d','{"name":"FUZZ"}','-fr','error']
+
+notes:
+  - "This manifest covers the most commonly used ffuf flags from the -h output."
+  - "Some flags accept multiple entries (-H, -acc, -acs, -w with multiple) — adapters should support repeating or comma-separated inputs."
+  - "Validators referenced in 'placeholders_global_validators' are suggestions; implement or map them to your project's validator functions."

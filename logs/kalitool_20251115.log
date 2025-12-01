@@ -1,0 +1,5 @@
+2025-11-15 10:17:02 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nping
+2025-11-15 10:18:15 | INFO     | tools.Nmap.nping_adapter | Constructed nping command: nping --tcp -p 8080 --ttl 60 10.10.10.1
+2025-11-15 10:18:23 | ERROR    | KaliToolAutoBot | Command failed: 'nping' is not recognized as an internal or external command,
+operable program or batch file.
+

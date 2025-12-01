@@ -1,0 +1,18 @@
+2025-12-01 12:16:58 | INFO     | KaliToolAutoBot | Loaded manifest for Masscan/masscan
+2025-12-01 17:32:43 | INFO     | KaliToolAutoBot | Loaded manifest for Ffuf/ffuf
+2025-12-01 17:33:02 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ndiff
+2025-12-01 17:33:21 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
+2025-12-01 17:51:19 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ncat
+2025-12-01 17:52:41 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ndiff
+2025-12-01 17:53:42 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nping
+2025-12-01 17:55:45 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ndiff
+2025-12-01 17:56:45 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/zenmap
+2025-12-01 17:56:45 | INFO     | tools.Nmap.zenmap_adapter | Configuring zenmap
+2025-12-01 17:56:57 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ndiff
+2025-12-01 17:57:51 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/zenmap
+2025-12-01 17:57:51 | INFO     | tools.Nmap.zenmap_adapter | Configuring zenmap
+2025-12-01 18:01:36 | INFO     | KaliToolAutoBot | Loaded manifest for Ffuf/ffuf
+2025-12-01 18:46:17 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
+2025-12-01 18:53:36 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
+2025-12-01 19:02:48 | INFO     | KaliToolAutoBot | Loaded manifest for Ffuf/ffuf
+2025-12-01 19:04:11 | INFO     | KaliToolAutoBot | Loaded manifest for Ffuf/ffuf
