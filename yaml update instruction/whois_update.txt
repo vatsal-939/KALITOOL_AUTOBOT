@@ -1,0 +1,303 @@
+Output of whois -h:
+
+Usage: whois [OPTION]... OBJECT...
+
+-h HOST, --host HOST   connect to server HOST
+-p PORT, --port PORT   connect to PORT
+-I                     query whois.iana.org and follow its referral
+-H                     hide legal disclaimers
+      --verbose        explain what is being done
+      --no-recursion   disable recursion from registry to registrar servers
+      --help           display this help and exit
+      --version        output version information and exit
+
+These flags are supported by whois.ripe.net and some RIPE-like servers:
+-l                     find the one level less specific match
+-L                     find all levels less specific matches
+-m                     find all one level more specific matches
+-M                     find all levels of more specific matches
+-c                     find the smallest match containing a mnt-irt attribute
+-x                     exact match
+-b                     return brief IP address ranges with abuse contact
+-B                     turn off object filtering (show email addresses)
+-G                     turn off grouping of associated objects
+-d                     return DNS reverse delegation objects too
+-i ATTR[,ATTR]...      do an inverse look-up for specified ATTRibutes
+-T TYPE[,TYPE]...      only look for objects of TYPE
+-K                     only primary keys are returned
+-r                     turn off recursive look-ups for contact information
+-R                     force to show local copy of the domain object even
+                       if it contains referral
+-a                     also search all the mirrored databases
+-s SOURCE[,SOURCE]...  search the database mirrored from SOURCE
+-g SOURCE:FIRST-LAST   find updates from SOURCE from serial FIRST to LAST
+-t TYPE                request template for object of TYPE
+-v TYPE                request verbose template for object of TYPE
+-q [version|sources|types]  query specified server info
+
+==========================================================================
+
+Whois Services:
+
+GLOBAL WHOIS NOTES (APPLY TO ALL SERVICES)
+⦁ WHOIS is server-dependent
+=> whois is not a unified protocol
+=> Each registry server:
+            => Supports different flags
+            => Returns different object models
+=> Automation must not assume uniform output
+
+⦁ Output is human-oriented, not structured
+=> No native JSON / XML output
+=> Field names vary by registry
+=> Parsing must be:
+            => Regex-based
+            => Server-aware
+
+1. Standard Query
+
+Syntax:
+whois [standard options] OBJECT...
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	OBJECT:
+Domain name (example.com)
+IPv4 / IPv6 address
+CIDR block (server-dependent)
+Autonomous System (AS<number>)
+
+⦁	Output & Visibility Control
+-H
+--verbose
+
+⦁	Informational / Control Options
+--help | --version
+
+=> cannot combine with 4
+
+⦁ OBJECT... Resolution Order
+-> For domains:
+            -> Query starts at IANA
+            -> Then follows registrar referral
+-> For IP / ASN: Registry depends on IP region (ARIN, RIPE, APNIC, etc.)
+
+⦁ CIDR Support Is NOT Universal
+-> CIDR blocks:
+            -> Supported mainly by RIPE-like servers
+            -> Often rejected by ARIN
+-> Automation should: Fall back to single IP queries if CIDR fails
+
+⦁ -H (Hide Legal Disclaimer)
+-> Works only if: Server sends a disclaimer block
+-> Some servers ignore this flag
+
+==========================================================================
+
+2. Server & Referral Control
+
+Syntax:
+whois [server/referral options] OBJECT...
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	OBJECT:
+Domain name (example.com)
+IPv4 / IPv6 address
+CIDR block (server-dependent)
+Autonomous System (AS<number>)
+
+⦁	Server Selection
+-h <HOST>
+-p <PORT>
+
+⦁	Referral Control
+-I | --no-recursion
+
+⦁	Output Visibility Modifier
+--verbose
+
+=> depends on service 1
+=> can combine with 3
+=> cannot combine with 4
+
+⦁ -h <HOST> Overrides Default Resolution
+-> Skips: IANA referral logic
+-> Query is sent directly to specified server
+-> If wrong server is chosen: Results may be incomplete or empty
+
+⦁ -I vs --no-recursion
+-> They are opposites, not complements
+            -> -I → force recursion via IANA
+            -> --no-recursion → stop at first response
+-> Using wrong one can: Hide registrar-level details
+
+⦁ -p <PORT>
+-> Rarely needed
+-> Many WHOIS servers: Reject non-standard ports
+-> Automation should avoid unless explicitly required
+
+==========================================================================
+
+3. Advanced Registry Query
+
+Syntax:
+whois [advanced registry options] OBJECT...
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	OBJECT:
+Domain name (example.com)
+IPv4 / IPv6 address
+CIDR block (server-dependent)
+Autonomous System (AS<number>)
+
+⦁	Match Scope Control
+-l | -L | -x
+-m | -M | -x
+
+⦁	Object Filtering
+-T <TYPE[,TYPE]...>
+-K
+
+⦁	Inverse Lookup
+-i <ATTR[,ATTR]...>
+
+⦁	Registry Database Selection
+-a | -s <SOURCE[,SOURCE]...>
+
+⦁	Registry Change History
+-g <SOURCE:FIRST-LAST>
+
+⦁	Additional Registry Controls
+-c
+-b
+-B
+-G
+-d
+-r
+-R
+
+=> depends on service 1
+=> can combine with 2
+=> cannot combine with 4
+
+⦁ Mutual Exclusion Clarification (IMPORTANT)
+Your grouping is logically correct, but behaviorally:
+-> -x (exact match) overrides: -l, -L, -m, -M
+-> If combined: Server usually ignores broader match flags
+
+⦁ RIPE-ONLY Reality
+The following are NOT portable:
+-> -l, -L, -m, -M
+-> -c, -b, -B, -G
+-> -i, -T, -K
+-> -g, -a, -s
+If used against:
+-> .com, .org, ARIN, APNIC (non-RIPE endpoints) → Command may:
+-> Fail
+-> Return partial data
+-> Ignore flags silently
+
+⦁ Inverse Lookup (-i)
+-> Can be extremely slow
+-> Often rate-limited
+-> Automation should:
+            -> Limit scope
+            -> Expect incomplete results
+
+==========================================================================
+
+4. Metadata & Template
+
+Syntax:
+whois [metadata/template options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Server Metadata Queries
+-q version | sources | types
+
+⦁	Object Template Queries
+-t <TYPE> | -v <TYPE>
+
+=> cannot combine with anyone.
+
+⦁ No OBJECT Allowed (Correctly Stated)
+Additional note:
+-> Providing OBJECT accidentally:
+            -> Is ignored by client
+            -> Or causes error depending on server
+
+⦁ -t vs -v
+-> -t TYPE → blank object template
+-> -v TYPE → verbose template with field explanations
+-> Not all servers support both
+
+⦁ -q Queries Server Capabilities
+-> -q version | sources | types
+-> Does not query domain/IP data
+-> Useful for:
+            -> Detecting supported registries
+            -> Automation feature detection
+
+==========================================================================
+
+5. Alternative Syntax & Server Compatibility Service
+
+Syntax:
+whois [alternative syntax options] OBJECT...
+whois [alternative syntax options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Long Form Flag Equivalents
+--host <HOST> (equivalent to -h)
+--port <PORT> (equivalent to -p)
+
+-> All standard flags have both short (-flag) and long (--flag) form alternatives
+-> Long forms are equivalent to short forms shown in Services 1-4
+
+⦁	Server Compatibility Notes
+-> Standard options (Services 1-2): Work with all WHOIS servers
+-> RIPE-like options (Service 3): Supported by whois.ripe.net and some RIPE-like servers
+-> Not all WHOIS servers support RIPE-style extended options
+-> Server compatibility may vary; check server documentation for supported flags
+
+⦁	OBJECT Types (Applicable to Services 1-3)
+Domain name (example.com)
+IPv4 / IPv6 address
+CIDR block (server-dependent support)
+Autonomous System (AS<number>)
+
+⦁	Additional Compatibility Information
+-> Service 3 advanced registry options are primarily for RIPE and RIPE-like servers
+-> Standard WHOIS servers (most .com, .org, etc.) typically only support basic options
+-> Template queries (Service 4) work with servers that support template requests
+-> Metadata queries (Service 4) query server capabilities, not domain/IP data
+
+⦁	Best Practices
+-> Start with Service 1 (Standard Query) for basic lookups
+-> Use Service 2 for custom server or referral control
+-> Use Service 3 only when querying RIPE or RIPE-like servers
+-> Use Service 4 for server capability discovery and template requests
+
+=> Alternative syntax options can be used in place of short forms in Services 1-4
+=> Server compatibility determines which advanced options will work
+
+⦁ Long Form Flags Are NOT Universally Supported
+-> Some older WHOIS clients: Support only short flags
+-> Automation should: Prefer short flags for portability
+
+⦁ Rate Limiting & Blocking
+-> Many WHOIS servers enforce:
+            -> Query limits
+            -> Temporary IP bans
+-> Automation should:
+            -> Throttle requests
+            -> Cache results

@@ -1,12 +1,11 @@
 """
-tools/Whois/whois_adapter.py
+whois_adapter.py
+================
 
-Interactive adapter for the `whois` CLI. Loads yaml/Whois/whois.yaml via
-ManifestLoader, prompts the user for options grouped into Standard and
-RIPE-style sections, validates inputs with validators.*, builds the whois
-command, displays it, and optionally executes it while streaming output.
+Interactive adapter for Whois. Loads yaml/Masscan/whois.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
 
-Save path: tools/Whois/whois_adapter.py
 """
 
 import shlex

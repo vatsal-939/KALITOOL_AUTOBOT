@@ -1,11 +1,11 @@
 """
-tools/Ffuf/ffuf_adapter.py
+ffuf_adapter.py
+================
 
 Interactive adapter for ffuf. Loads yaml/Ffuf/ffuf.yaml via ManifestLoader,
 prompts user for options, validates inputs using validators.*, builds command tokens,
 displays the final command and can execute it (streams output).
 
-Place this file at: tools/Ffuf/ffuf_adapter.py
 """
 
 import shlex

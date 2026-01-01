@@ -1,0 +1,767 @@
+Output of nping -h:
+
+Nping 0.7.95 ( https://nmap.org/nping )
+Usage: nping [Probe mode] [Options] {target specification}
+
+TARGET SPECIFICATION:
+  Targets may be specified as hostnames, IP addresses, networks, etc.
+  Ex: scanme.nmap.org, microsoft.com/24, 192.168.0.1; 10.0.*.1-24
+PROBE MODES:
+  --tcp-connect                    : Unprivileged TCP connect probe mode.
+  --tcp                            : TCP probe mode.
+  --udp                            : UDP probe mode.
+  --icmp                           : ICMP probe mode.
+  --arp                            : ARP/RARP probe mode.
+  --tr, --traceroute               : Traceroute mode (can only be used with 
+                                     TCP/UDP/ICMP modes).
+TCP CONNECT MODE:
+   -p, --dest-port <port spec>     : Set destination port(s).
+   -g, --source-port <portnumber>  : Try to use a custom source port.
+TCP PROBE MODE:
+   -g, --source-port <portnumber>  : Set source port.
+   -p, --dest-port <port spec>     : Set destination port(s).
+   --seq <seqnumber>               : Set sequence number.
+   --flags <flag list>             : Set TCP flags (ACK,PSH,RST,SYN,FIN...)
+   --ack <acknumber>               : Set ACK number.
+   --win <size>                    : Set window size.
+   --badsum                        : Use a random invalid checksum. 
+UDP PROBE MODE:
+   -g, --source-port <portnumber>  : Set source port.
+   -p, --dest-port <port spec>     : Set destination port(s).
+   --badsum                        : Use a random invalid checksum. 
+ICMP PROBE MODE:
+  --icmp-type <type>               : ICMP type.
+  --icmp-code <code>               : ICMP code.
+  --icmp-id <id>                   : Set identifier.
+  --icmp-seq <n>                   : Set sequence number.
+  --icmp-redirect-addr <addr>      : Set redirect address.
+  --icmp-param-pointer <pnt>       : Set parameter problem pointer.
+  --icmp-advert-lifetime <time>    : Set router advertisement lifetime.
+  --icmp-advert-entry <IP,pref>    : Add router advertisement entry.
+  --icmp-orig-time  <timestamp>    : Set originate timestamp.
+  --icmp-recv-time  <timestamp>    : Set receive timestamp.
+  --icmp-trans-time <timestamp>    : Set transmit timestamp.
+ARP/RARP PROBE MODE:
+  --arp-type <type>                : Type: ARP, ARP-reply, RARP, RARP-reply.
+  --arp-sender-mac <mac>           : Set sender MAC address.
+  --arp-sender-ip  <addr>          : Set sender IP address.
+  --arp-target-mac <mac>           : Set target MAC address.
+  --arp-target-ip  <addr>          : Set target IP address.
+IPv4 OPTIONS:
+  -S, --source-ip                  : Set source IP address.
+  --dest-ip <addr>                 : Set destination IP address (used as an 
+                                     alternative to {target specification} ). 
+  --tos <tos>                      : Set type of service field (8bits).
+  --id  <id>                       : Set identification field (16 bits).
+  --df                             : Set Don't Fragment flag.
+  --mf                             : Set More Fragments flag.
+  --evil                           : Set Reserved / Evil flag.
+  --ttl <hops>                     : Set time to live [0-255].
+  --badsum-ip                      : Use a random invalid checksum. 
+  --ip-options <R|S [route]|L [route]|T|U ...> : Set IP options
+  --ip-options <hex string>                    : Set IP options
+  --mtu <size>                     : Set MTU. Packets get fragmented if MTU is
+                                     small enough.
+IPv6 OPTIONS:
+  -6, --IPv6                       : Use IP version 6.
+  --dest-ip                        : Set destination IP address (used as an
+                                     alternative to {target specification}).
+  --hop-limit                      : Set hop limit (same as IPv4 TTL).
+  --traffic-class <class> :        : Set traffic class.
+  --flow <label>                   : Set flow label.
+ETHERNET OPTIONS:
+  --dest-mac <mac>                 : Set destination mac address. (Disables
+                                     ARP resolution)
+  --source-mac <mac>               : Set source MAC address.
+  --ether-type <type>              : Set EtherType value.
+PAYLOAD OPTIONS:
+  --data <hex string>              : Include a custom payload.
+  --data-string <text>             : Include a custom ASCII text.
+  --data-length <len>              : Include len random bytes as payload.
+ECHO CLIENT/SERVER:
+  --echo-client <passphrase>       : Run Nping in client mode.
+  --echo-server <passphrase>       : Run Nping in server mode.
+  --echo-port <port>               : Use custom <port> to listen or connect.
+  --no-crypto                      : Disable encryption and authentication.
+  --once                           : Stop the server after one connection.
+  --safe-payloads                  : Erase application data in echoed packets.
+TIMING AND PERFORMANCE:
+  Options which take <time> are in seconds, or append 'ms' (milliseconds),
+  's' (seconds), 'm' (minutes), or 'h' (hours) to the value (e.g. 30m, 0.25h).
+  --delay <time>                   : Adjust delay between probes.
+  --rate  <rate>                   : Send num packets per second.
+MISC:
+  -h, --help                       : Display help information.
+  -V, --version                    : Display current version number. 
+  -c, --count <n>                  : Stop after <n> rounds.
+  -e, --interface <name>           : Use supplied network interface.
+  -H, --hide-sent                  : Do not display sent packets.
+  -N, --no-capture                 : Do not try to capture replies.
+  --privileged                     : Assume user is fully privileged.
+  --unprivileged                   : Assume user lacks raw socket privileges.
+  --send-eth                       : Send packets at the raw Ethernet layer.
+  --send-ip                        : Send packets using raw IP sockets.
+  --bpf-filter <filter spec>       : Specify custom BPF filter.
+OUTPUT:
+  -v                               : Increment verbosity level by one.
+  -v[level]                        : Set verbosity level. E.g: -v4
+  -d                               : Increment debugging level by one.
+  -d[level]                        : Set debugging level. E.g: -d3
+  -q                               : Decrease verbosity level by one.
+  -q[N]                            : Decrease verbosity level N times
+  --quiet                          : Set verbosity and debug level to minimum.
+  --debug                          : Set verbosity and debug to the max level.
+EXAMPLES:
+  nping scanme.nmap.org
+  nping --tcp -p 80 --flags rst --ttl 2 192.168.1.1
+  nping --icmp --icmp-type time --delay 500ms 192.168.254.254
+  nping --echo-server "public" -e wlan0 -vvv 
+  nping --echo-client "public" echo.nmap.org --tcp -p1-1024 --flags ack
+
+SEE THE MAN PAGE FOR MANY MORE OPTIONS, DESCRIPTIONS, AND EXAMPLES
+
+==========================================================================
+
+Nping Services:
+
+GLOBAL NPING NOTES (Apply to ALL SERVICES)
+⦁ Privilege Reality (Automation-critical)
+=> Any probe mode except --tcp-connect requires raw sockets
+=> If user runs without privileges:
+        => Nping silently downgrades or ignores raw features
+        => No hard error is thrown
+=> Automation must pre-check privilege level and warn the user
+
+1.	TCP Connect Probe Service
+
+Syntax:
+nping --tcp-connect [options] <target specification>
+
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Destination & Source Ports
+-p, <port spec>
+-g, <portnumber>
+
+-> -g may ignored by OS.
+
+⦁	IP Layer Options
+(--ttl
+--tos
+--id
+--df | --mf
+--evil
+--badsum-ip
+--ip-options)
+|
+(-6
+--hop-limit
+--traffic-class
+--flow)
+-S
+--dest-ip
+--mtu
+
+-> shared flags are separated and ipv* specific flags are grouped.
+
+⦁	Ethernet Options
+--dest-mac
+--source-mac
+--ether-type
+
+-> Meaningful use with --send-eth.
+
+⦁	Payload Options
+--data
+--data-string
+--data-length
+
+-> limited effect
+
+⦁	Timing & Rate
+--delay <time>
+--rate <rate>
+-c, --count <n>
+
+⦁	Interface, Privilege & Send Method
+-e <name>
+--privileged | --unprivileged
+--send-ip | --send-eth
+
+⦁	Output & Debugging
+-v | -v[level]
+-d | -d[level]
+-q | -q[N]
+--quiet
+--debug
+-H
+-N
+--bpf-filter <filter spec>
+
+⦁	Target Specification Options (for <target specification>)
+command-line targets (hostname, IP, CIDR, range) | -iL <inputfile> | -iR <num hosts>
+--exclude <hosts>
+--excludefile <file>
+
+-> exclude ignore for single host.
+
+⦁ OS-Controlled Behavior
+-> --tcp-connect uses OS TCP stack
+-> Consequences:
+        -> --flags, --seq, --ack, --win are ignored
+        -> Timing is affected by OS TCP retransmission logic
+-> This mode is not suitable for low-level testing
+
+⦁ Source Port (-g)
+-> Many OSes:
+        -> Ignore user-defined source ports
+        -> Randomize them anyway
+-> This is not an error, but behavior differs by OS
+
+==========================================================================
+
+2. TCP Raw Probe Service
+
+Syntax:
+nping --tcp [options] <target specification>
+
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Destination & Source Ports
+-p, <port spec>
+-g, <portnumber>
+
+⦁	TCP Header Control
+--flags <flag list>
+--seq <seqnumber>
+--ack <acknumber>
+--win <size>
+--badsum
+
+-> --badsum intentionally breaks TCP checksums (Used for IDS/firewall testing)
+
+⦁	IP Layer Options
+(--ttl
+--tos
+--id
+--df | --mf
+--evil
+--badsum-ip
+--ip-options)
+|
+(-6
+--hop-limit
+--traffic-class
+--flow)
+-S
+--dest-ip
+--mtu
+
+-> shared flags are separated and ipv* specific flags are grouped.
+
+⦁	Ethernet Options
+--dest-mac
+--source-mac
+--ether-type
+
+-> Meaningful use with --send-eth.
+
+⦁	Payload Options
+--data
+--data-string
+--data-length
+
+⦁	Timing & Rate
+--delay <time>
+--rate <rate>
+-c, --count <n>
+
+⦁	Interface, Privilege & Send Method
+-e <name>
+--privileged | --unprivileged
+--send-ip | --send-eth
+
+-> --unprivileged is accepted but severely limits or disables raw packet features.
+
+⦁	Output & Debugging
+-v | -v[level]
+-d | -d[level]
+-q | -q[N]
+--quiet
+--debug
+-H
+-N
+--bpf-filter <filter spec>
+
+⦁	Target Specification Options (for <target specification>)
+command-line targets (hostname, IP, CIDR, range) | -iL <inputfile> | -iR <num hosts>
+--exclude <hosts>
+--excludefile <file>
+
+-> exclude ignore for single host.
+
+⦁ --unprivileged Clarification
+-> Your note is correct, but add:
+        -> Nping may fallback to TCP-connect-like behavior
+        -> Raw TCP fields are silently ignored
+-> Automation should: Warn and/or disable raw-only flags
+
+⦁ --flags
+-> Invalid flag combinations:
+        -> Are sent as-is
+        -> May get no response (looks like packet loss)
+-> IDS testing only — not reliability testing
+
+==========================================================================
+
+3. UDP Probe Service
+
+Syntax:
+nping --udp [options] <target specification>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Destination & Source Ports
+-p, <port spec>
+-g, <portnumber>
+
+⦁	UDP Header Control
+--badsum
+
+-> --badsum intentionally breaks UDP checksums (Used for IDS/firewall testing)
+
+⦁	IP Layer Options
+(--ttl
+--tos
+--id
+--df | --mf
+--evil
+--badsum-ip
+--ip-options)
+|
+(-6
+--hop-limit
+--traffic-class
+--flow)
+-S
+--dest-ip
+--mtu
+
+-> shared flags are separated and ipv* specific flags are grouped.
+
+⦁	Ethernet Options
+--dest-mac
+--source-mac
+--ether-type
+
+-> Meaningful use with --send-eth.
+
+⦁	Payload Options
+--data
+--data-string
+--data-length
+
+⦁	Timing & Rate
+--delay <time>
+--rate <rate>
+-c, --count <n>
+
+⦁	Interface, Privilege & Send Method
+-e <name>
+--privileged | --unprivileged
+--send-ip | --send-eth
+
+-> --unprivileged is accepted but severely limits or disables raw packet features.
+
+⦁	Output & Debugging
+-v | -v[level]
+-d | -d[level]
+-q | -q[N]
+--quiet
+--debug
+-H
+-N
+--bpf-filter <filter spec>
+
+⦁	Target Specification Options (for <target specification>)
+command-line targets (hostname, IP, CIDR, range) | -iL <inputfile> | -iR <num hosts>
+--exclude <hosts>
+--excludefile <file>
+
+-> exclude ignore for single host.
+
+⦁ UDP Silence ≠ Failure
+-> UDP probes often:
+        -> Receive no response
+        -> Are dropped silently
+-> This is expected, not an error
+-> Automation should avoid marking “no reply” as failure
+
+⦁ --badsum
+-> Many kernels: Drop packets with bad checksum before transmission
+-> Behavior varies by OS and NIC offloading
+
+==========================================================================
+
+4. ICMP Probe Service
+
+Syntax:
+nping --icmp [options] <target specification>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	ICMP Header Control
+(--icmp-type <type>
+--icmp-code <code>) (General or core)
+
+(--icmp-id <id>
+--icmp-seq <n>) (for type 0,8,13,14,17,18)
+
+(--icmp-redirect-addr <addr>) (for type 5)
+
+(--icmp-param-pointer <pnt>) (for type 12)
+
+(--icmp-advert-lifetime <time>
+--icmp-advert-entry <IP,pref>) (for type 9)
+
+(--icmp-orig-time <timestamp>
+--icmp-recv-time <timestamp>
+--icmp-trans-time <timestamp>) (for type 13,14)
+
+-> Mark ICMP types 17,18 as legacy and likely ignored by modern hosts
+-> Required --icmp-type for --icmp-code
+
+⦁	IP Layer Options
+(--ttl
+--tos
+--id
+--df | --mf
+--evil
+--badsum-ip
+--ip-options)
+|
+(-6
+--hop-limit
+--traffic-class
+--flow)
+-S
+--dest-ip
+--mtu
+
+-> shared flags are separated and ipv* specific flags are grouped.
+
+⦁	Ethernet Options
+--dest-mac
+--source-mac
+--ether-type
+
+-> Meaningful use with --send-eth.
+
+⦁	Payload Options
+--data
+--data-string
+--data-length
+
+-> Payloads may be ignored depending on ICMP type and target OS.
+-> useful for type 0,8,13,14,17,18
+
+⦁	Timing & Rate
+--delay <time>
+--rate <rate>
+-c, --count <n>
+
+⦁	Interface, Privilege & Send Method
+-e <name>
+--privileged | --unprivileged
+--send-ip | --send-eth
+
+-> --unprivileged is accepted but severely limits or disables raw packet features.
+
+⦁	Output & Debugging
+-v | -v[level]
+-d | -d[level]
+-q | -q[N]
+--quiet
+--debug
+-H
+-N
+--bpf-filter <filter spec>
+
+⦁	Target Specification Options (for <target specification>)
+command-line targets (hostname, IP, CIDR, range) | -iL <inputfile> | -iR <num hosts>
+--exclude <hosts>
+--excludefile <file>
+
+-> exclude ignore for single host.
+
+⦁ ICMP Type Dependency (Automation-important)
+-> You documented type-specific options correctly
+-> Add:
+        -> Invalid combinations are ignored, not rejected
+        -> Results may appear as “sent but no reply”
+-> Automation must validate: ICMP type ↔ option compatibility before execution
+
+⦁ Payload Reality
+-> Even for valid types: Many OSes strip or ignore payload
+-> Payload presence ≠ payload delivery
+
+==========================================================================
+
+5. ARP/RARP Probe Service
+
+Syntax:
+nping --arp [options] <target specification>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	ARP Header Control
+--arp-type <type>
+--arp-sender-mac <mac> (for type 2,3,4) (ignore for type 1)
+--arp-sender-ip  <addr> (for type 1,2,4) (ignore for type 3)
+--arp-target-mac <mac> (for type 2,3,4) (ignore for type 1)
+--arp-target-ip  <addr> (for type 1,2,4) (ignore for type 3)
+
+-> type 1 for ARP
+-> type 2 for ARP-reply
+-> type 3 for RARP
+-> type 4 for RARP-reply
+
+⦁	IP Layer Options (other name suggestion)
+--dest-ip
+
+⦁	Ethernet Options
+--dest-mac
+--source-mac
+--ether-type
+
+-> Meaningful use with --send-eth.
+
+⦁	Timing & Rate
+--delay <time>
+--rate <rate>
+-c, --count <n>
+
+⦁	Interface, Privilege & Send Method
+-e <name>
+--privileged | --unprivileged
+--send-ip | --send-eth
+
+-> --send-ip ignored; --send-eth mendatory
+-> --unprivileged is accepted but severely limits or disables raw packet features.
+
+⦁	Output & Debugging
+-v | -v[level]
+-d | -d[level]
+-q | -q[N]
+--quiet
+--debug
+-H
+-N
+--bpf-filter <filter spec>
+
+⦁	Target Specification Options (for <target specification>)
+command-line targets (hostname, IP, CIDR, range) | -iL <inputfile> | -iR <num hosts>
+--exclude <hosts>
+--excludefile <file>
+
+-> CIDR and ranges are allowed within the same L2 network
+-> exclude ignore for single host.
+
+⦁ L2-Only Scope (Very Important)
+-> ARP/RARP:
+        -> Works only on local Layer-2 networks
+        -> Never crosses routers
+-> Using public IPs will silently fail
+
+⦁ Mandatory Ethernet Send
+-> You correctly noted: --send-eth mandatory
+-> Add: --send-ip is ignored without warning
+
+⦁ RARP Reality
+-> RARP is largely obsolete
+-> Most modern hosts will ignore RARP entirely
+
+==========================================================================
+
+6. Traceroute Probe Service
+
+Syntax:
+nping --traceroute [probe mode] [options] <target specification>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Other Probe Mode
+--tcp | --tcp-connect | --udp | --icmp
+
+⦁	IP Layer Options
+--ttl | --hop-limit
+
+⦁	Ethernet Options
+--dest-mac
+--source-mac
+--ether-type
+
+-> Meaningful use with --send-eth.
+-> Rarely used
+
+⦁	Payload Options
+--data
+--data-string
+--data-length
+
+-> Meaningful mostly for TCP/UDP traceroute
+
+⦁	Timing & Rate
+--delay <time>
+--rate <rate>
+-c, --count <n>
+
+⦁	Interface, Privilege & Send Method
+-e <name>
+--privileged | --unprivileged
+--send-ip | --send-eth
+
+⦁	Output & Debugging
+-v | -v[level]
+-d | -d[level]
+-q | -q[N]
+--quiet
+--debug
+-H
+-N
+--bpf-filter <filter spec>
+
+⦁	Target Specification Options (for <target specification>)
+command-line targets (hostname, IP, CIDR, range) | -iL <inputfile> | -iR <num hosts>
+--exclude <hosts>
+--excludefile <file>
+
+-> Multi-target traceroute is slow and noisy
+
+⦁ Mandatory Probe Mode
+-> --traceroute:
+        -> Does nothing alone
+        -> Requires one of: --tcp, --tcp-connect, --udp, --icmp
+-> If omitted: Nping errors out (unlike other silent ignores)
+
+⦁ Payload + TTL Interaction
+-> Payload size + MTU:
+        -> Can cause fragmentation
+        -> Alters hop behavior
+-> Automation should avoid large payloads here
+
+==========================================================================
+
+7. Echo Client/Server & Advanced Utility Service
+
+Syntax:
+nping --echo-client <passphrase> [options] <target>
+nping --echo-server <passphrase> [options] <target>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Echo Client/Server Mode
+--echo-client <passphrase>
+--echo-server <passphrase>
+--echo-port <port>
+--no-crypto
+--once
+--safe-payloads
+
+-> --echo-client: Run Nping in client mode for echo protocol
+-> --echo-server: Run Nping in server mode for echo protocol
+-> --echo-port: Use custom port for echo client/server (default uses standard ports)
+-> --no-crypto: Disable encryption and authentication for echo protocol
+-> --once: Stop echo server after one connection (server mode only)
+-> --safe-payloads: Erase application data in echoed packets (security feature)
+
+⦁	Output Control (Verbosity & Debugging)
+-q | -q[N]
+--quiet
+--debug
+
+-> -q: Decrease verbosity level by one (can be used multiple times: -q, -qq, -qqq)
+-> -q[N]: Decrease verbosity level N times
+-> --quiet: Set verbosity and debug level to minimum
+-> --debug: Set verbosity and debug to maximum level (opposite of --quiet)
+
+⦁	Informational & Help
+-h | --help
+-V | --version
+
+⦁	Packet Capture Filtering
+--bpf-filter <filter spec>
+
+-> Specify custom BPF (Berkeley Packet Filter) filter for packet capture
+-> Allows fine-grained control over which packets are captured/processed
+
+⦁	Target Specification Options (for {target specification})
+command-line targets (hostname, IP, CIDR, range) | -iL <inputfile> | -iR <num hosts>
+--exclude <hosts>
+--excludefile <file>
+
+-> These options apply to all probe modes and echo modes
+-> -iL: Input from list of hosts/networks
+-> -iR: Choose random targets (number of hosts)
+-> --exclude: Exclude specific hosts/networks
+-> --excludefile: Exclude list from file
+-> Exclude options ignore single host targets
+
+⦁	Additional Notes on Echo Mode
+-> Echo client/server mode allows testing network connectivity with encrypted echo protocol
+-> Requires matching passphrase on both client and server sides (unless --no-crypto used)
+-> Can be combined with probe mode options (e.g., --tcp, --udp, --icmp) for echo over different protocols
+-> Echo protocol useful for network testing, firewall rule verification, and connectivity checks
+-> See examples in help: --echo-server "public" -e wlan0 -vvv
+
+⦁	Compatibility Notes
+-> Echo modes work with probe mode options (--tcp, --udp, --icmp) when specified
+-> Most other probe-specific options (e.g., --flags, --icmp-type) can be combined with echo modes
+-> Output and verbosity options work with all modes including echo
+-> See nping man page for more options, descriptions and usage examples
+
+=> Echo modes can be used standalone or combined with probe mode options
+=> Output control options can combine with any service (1-6) and echo modes
+
+⦁ Echo ≠ Ping
+-> Echo protocol:
+        -> Is custom, not ICMP echo
+        -> Requires both sides running nping
+-> Firewalls may:
+        -> Allow ICMP
+        -> Block echo protocol
+
+⦁ --no-crypto
+-> Completely disables:
+        -> Authentication
+        -> Encryption
+-> Should be flagged as unsafe in automation UI
+
+⦁ --safe-payloads
+-> Strongly recommended when:
+        -> Echoing application data
+        -> Testing in shared environments
+
+
+⦁ Cross-Service Interaction Notes (Important)
+Echo + Probe Modes
+-> Valid combinations: Echo over TCP / UDP / ICMP
+-> Invalid assumptions:
+        -> Echo does not inherit all probe semantics
+        -> Some probe-specific fields are ignored
+
+--bpf-filter
+-> Affects capture, not sending
+-> Can make it look like:
+        -> No responses
+        -> Broken network
+-> Automation should warn when used

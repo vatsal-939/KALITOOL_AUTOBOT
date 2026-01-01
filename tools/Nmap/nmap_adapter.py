@@ -1,14 +1,11 @@
 """
-tools/Nmap/nmap_adapter.py
+nmap_adapter.py
+================
 
-Interactive adapter to build Nmap commands from yaml/Nmap/nmap.yaml.
+Interactive adapter for nmap. Loads yaml/Masscan/nmap.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
 
-Behavior:
- - Loads manifest via ManifestLoader(base_yaml_dir)
- - Shows available services (logical groups) and lets user choose which ones to configure
- - Prompts for placeholders, validates with validators.*, and assembles cmd_list
- - Demands extra confirmation when high-risk flags are selected
- - Returns dict with cmd_list, cmd_quoted, manifest, and chosen metadata
 """
 
 import shlex

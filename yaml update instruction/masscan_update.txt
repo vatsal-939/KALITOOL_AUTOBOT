@@ -1,0 +1,254 @@
+Output of masscan -h:
+
+MASSCAN is a fast port scanner. The primary input parameters are the
+IP addresses/ranges you want to scan, and the port numbers. An example
+is the following, which scans the 10.x.x.x network for web servers:
+ masscan 10.0.0.0/8 -p80
+The program auto-detects network interface/adapter settings. If this
+fails, you'll have to set these manually. The following is an
+example of all the parameters that are needed:
+ --adapter-ip 192.168.10.123
+ --adapter-mac 00-11-22-33-44-55
+ --router-mac 66-55-44-33-22-11
+Parameters can be set either via the command-line or config-file. The
+names are the same for both. Thus, the above adapter settings would
+appear as follows in a configuration file:
+ adapter-ip = 192.168.10.123
+ adapter-mac = 00-11-22-33-44-55
+ router-mac = 66-55-44-33-22-11
+All single-dash parameters have a spelled out double-dash equivalent,
+so '-p80' is the same as '--ports 80' (or 'ports = 80' in config file).
+To use the config file, type:
+ masscan -c <filename>
+To generate a config-file from the current settings, use the --echo
+option. This stops the program from actually running, and just echoes
+the current configuration instead. This is a useful way to generate
+your first config file, or see a list of parameters you didn't know
+about. I suggest you try it now:
+ masscan -p1234 --echo
+
+==========================================================================
+
+Masscan Services:
+
+Global Masscan Notes (Apply to ALL Services)
+⦁ Global Alerts
+=> Masscan is not Nmap:
+        => It does not perform full TCP handshakes
+        => Results are probabilistic, not authoritative
+=> Masscan is stateless:
+        => Packet loss → missed ports
+        => No retries unless explicitly configured
+=> Masscan can easily overload networks or trigger IDS/IPS
+
+⦁ Automation Pitfalls
+=> Exit code 0 does not mean scan success
+=> “Open” ports may be false positives
+=> Always post-validate Masscan output with a stateful scanner (e.g., Nmap)
+
+1. Active Port Scanning Service
+
+Syntax:
+masscan <target specification> -p <ports> [scan options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Scan Rate & Performance Control
+--rate <packets-per-second>
+
+⦁	Network Adapter / Routing
+--adapter-ip <ip>
+--adapter-mac <mac>
+--router-mac <mac>
+--adapter-port <port>
+--adapter-vlan <vlan>
+
+⦁	Source & Packet Behavior
+--source-ip <ip>
+--source-port <port>
+--ttl <value>
+--banners
+
+⦁	Timing & Reliability
+--retries <n>
+--wait <time>
+
+⦁	Privilege & Execution Context
+--privileged | --unprivileged
+
+⦁	Target Specification Options (for <target specification>)
+hostname
+IP address
+CIDR block
+IP range
+
+=> Can combine with service 4
+=> Cannot combine with service 2,3
+
+⦁ Alerts
+-> --rate:
+        -> Too high → packet drops, false negatives
+        -> Too low → scan becomes slower than Nmap
+-> --banners:
+        -> Extremely limited (only works for a few protocols)
+        -> Often misunderstood as full service detection (it is not)
+
+⦁ Privilege Warnings
+-> --unprivileged:
+        -> Severely limits scan speed and accuracy
+        -> Some scan types silently disabled
+-> Raw packet sending requires root/admin on most systems
+
+⦁ Network Adapter Pitfalls
+-> Auto-detection: Often fails on VPNs, Docker, WSL, cloud instances
+-> Incorrect --router-mac: Causes zero results with no error
+
+⦁ Automation Pitfall
+-> --wait:
+        -> Too short → output truncated
+        -> Masscan may still be receiving packets after scan completes
+
+==========================================================================
+
+2. Configuration File Execution Service
+
+Syntax:
+masscan -c <config-file>
+
+=> Can combine with service 4
+=> Cannot combine with service 1,3
+
+⦁ Alerts
+-> -c <config-file>:
+        -> Completely overrides command-line options
+        -> Order of parameters inside config file matters
+-> Config file supports far more options than help output
+
+⦁ Automation Pitfall
+-> Relative paths inside config files resolve from current working directory
+-> Syntax errors in config file: Often fail silently or partially apply
+
+==========================================================================
+
+3. Echo / Configuration Generation Service
+
+Syntax:
+masscan [options] --echo
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Target & Port
+hostname
+IP address
+CIDR block
+IP range
+-p
+
+⦁	Rate & Timing
+--rate <packets-per-second>
+--wait <seconds>
+--retries <n>
+
+⦁	Network Adapter / Routing
+--adapter-ip <ip>
+--adapter-mac <mac>
+--router-mac <mac>
+--adapter-port <port>
+--adapter-vlan <vlan>
+
+⦁	Source & Packet Behavior
+--source-ip <ip>
+--source-port <port>
+--ttl <value>
+--banners
+
+⦁	Output Parameters
+-oX | -oJ | -oB
+--output-format
+--output-filename
+
+-> All of these are printed, not executed.
+
+=> Cannot combine with anyone.
+
+⦁ Alerts
+-> --echo:
+        -> No packets are sent
+        -> No scanning occurs (many users misunderstand this)
+-> Output includes every internal parameter, not just user-specified ones
+
+⦁ Automation Pitfall
+-> Output is not stable across versions
+-> Do not parse --echo output as structured data without normalization
+
+==========================================================================
+
+4. Output & Reporting Service
+
+Syntax:
+masscan <scan service> [output options]
+
+Options:
+
+⦁	Output Format & Destination
+-oX <file>
+-oJ <file>
+-oB <file>
+
+=> Can combine with service 1,2
+=> Cannot combine with service 3
+
+⦁ Alerts
+-> Output formats:
+        -> -oX: XML (Masscan-specific, not Nmap-compatible)
+        -> -oJ: JSON (line-based, not a single JSON array)
+        -> -oB: Binary (fastest, requires masscan for parsing)
+
+⦁ Automation Pitfall
+-> -oB:
+        -> Not human-readable
+        -> Must be post-processed using masscan itself
+-> -oJ: Requires JSON streaming parser, not standard json.load()
+
+==========================================================================
+
+5. Advanced Configuration & Miscellaneous Service
+
+Syntax:
+masscan [scan service] [advanced/miscellaneous options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Port Specification (Alternative Syntax)
+--ports <ports> (equivalent to -p)
+
+-> All single-dash parameters have double-dash equivalents (e.g., -p = --ports)
+
+⦁	Note on Parameter Discovery
+-> Use --echo option (Service 3) to discover all available parameters not listed in help
+-> The help output is brief; masscan supports many parameters discoverable via --echo
+-> Parameters can be specified via command-line or config file with same names
+
+⦁	Network Interface Auto-detection
+-> Masscan auto-detects network interface/adapter settings
+-> If auto-detection fails, manually specify adapter settings (see Service 1)
+
+⦁	Privilege Requirements
+-> Root/administrator privileges typically required for raw socket access
+-> Use --unprivileged if running without raw socket privileges (limited functionality)
+
+=> Can combine with service 1,2,4 as appropriate
+=> Many additional parameters exist beyond help output - use --echo to discover
+
+⦁ Alerts
+-> --ports vs -p: Identical behavior, but do not use both
+-> Many advanced options:
+        -> Not shown in -h
+        -> Discovered only via --echo
+
+⦁ Automation Pitfall
+-> Masscan does not validate conflicting parameters; Invalid combinations may silently fall back to defaults
+-> Different Masscan versions expose different parameters

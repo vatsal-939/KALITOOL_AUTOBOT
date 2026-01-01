@@ -1,12 +1,11 @@
 """
-tools/Whois/mkpasswd_adapter.py
+mkpasswd_adapter.py
+================
 
-Interactive adapter for mkpasswd (from the whois package).
-Loads yaml/Whois/mkpasswd.yaml, prompts the user for hashing options,
-validates inputs using validators.*, builds the mkpasswd command, shows it,
-and optionally executes it.
+Interactive adapter for Mkpasswd. Loads yaml/Masscan/mkpasswd.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
 
-Place this file at: tools/Whois/mkpasswd_adapter.py
 """
 
 import shlex

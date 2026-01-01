@@ -1,0 +1,190 @@
+Output of sqlmapapi -h:
+
+Usage: sqlmapapi [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -s, --server          Run as a REST-JSON API server
+  -c, --client          Run as a REST-JSON API client
+  -H HOST, --host=HOST  Host of the REST-JSON API server (default "127.0.0.1")
+  -p PORT, --port=PORT  Port of the REST-JSON API server (default 8775)
+  --adapter=ADAPTER     Server (bottle) adapter to use (default "wsgiref")
+  --database=DATABASE   Set IPC database filepath (optional)
+  --username=USERNAME   Basic authentication username (optional)
+  --password=PASSWORD   Basic authentication password (optional)
+
+==========================================================================
+
+Sqlmapapi Services:
+
+GLOBAL SQLMAPAPI NOTES (Apply to ALL SERVICES)
+⦁	sqlmapapi is a Controller, not a Scanner
+=> sqlmapapi does not scan by itself
+=> It only:
+        => Starts a REST API
+        => Submits jobs to sqlmap
+        => Manages task lifecycle
+=> Automation must clearly separate:
+        => API management
+        => sqlmap execution logic
+
+⦁	sqlmapapi depends on sqlmap binary
+=> If sqlmap is missing / broken:
+        => API starts
+        => Tasks fail silently
+=> Automation should:
+        => Validate sqlmap availability before starting server
+
+1.	API Server Service
+
+Syntax:
+sqlmapapi --server [server options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Server Network Binding
+-H <host>
+-p <port>
+
+⦁	Server Backend / Runtime
+--adapter=<adapter>
+
+⦁	State Persistence
+--database=<filepath>
+
+⦁	Authentication
+--username=<username>
+--password=<password>
+
+-> Both must be together.
+
+⦁	Binding & Exposure Risk
+-> Default binding: 127.0.0.1:8775
+-> If user binds: 0.0.0.0
+-> Then:
+        -> API becomes remotely accessible
+        -> Anyone can submit SQLi tasks
+-> Strong recommendation: Never expose publicly without authentication
+
+⦁	Authentication Is Weak (Basic Auth Only)
+-> Uses HTTP Basic Authentication
+-> No:
+        -> Token rotation
+        -> Rate limiting
+        -> Role separation
+-> Should only be used:
+        -> On localhost
+        -> Or behind a reverse proxy
+
+⦁	--username & --password
+-> You correctly stated they must be together
+-> Additional reality: Credentials are transmitted base64, not encrypted
+-> Automation should warn: Use HTTPS or localhost only
+
+⦁	--adapter
+-> Uses Python Bottle adapters
+-> Common issues:
+        -> wsgiref → single-threaded, slow
+        -> Other adapters may not be installed
+-> Automation should:
+        -> Validate adapter availability
+        -> Warn about concurrency limitations
+
+⦁	--database
+-> Stores:
+        -> Task metadata
+        -> Session references
+-> Important: Not the same as sqlmap session directory
+-> If omitted: All task data is lost on restart
+
+==========================================================================
+
+2. API Client Service
+
+Syntax:
+sqlmapapi --client [client options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Server Network Binding
+-H <host>
+-p <port>
+
+⦁	Authentication
+--username=<username>
+--password=<password>
+
+-> Both must be together.
+
+⦁	Client Mode Does NOT Run Scans
+-> sqlmapapi --client:
+        -> Only sends HTTP requests
+        -> Requires an already running server
+-> Automation must: Check server availability before client execution
+
+⦁	Authentication Dependency
+-> If server has auth enabled: Client must provide credentials
+-> If mismatched:
+        -> API responds with 401
+        -> No clear error from CLI
+
+⦁	No Task Validation
+-> Client does not validate:
+        -> sqlmap options
+        -> Service compatibility
+-> Bad payloads are accepted and fail later
+-> Your service-based validation layer is necessary
+
+==========================================================================
+
+3. Informational & Alternative Syntax Service
+
+Syntax:
+sqlmapapi [informational/alternative syntax options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Help & Documentation
+-h | --help
+
+-> Show help message and exit
+
+⦁	Short Form Flag Equivalents
+-s (equivalent to --server)
+-c (equivalent to --client)
+
+-> -s/--server: Run as REST-JSON API server (used in Service 1 syntax)
+-> -c/--client: Run as REST-JSON API client (used in Service 2 syntax)
+-> Both short and long forms are equivalent and interchangeable
+
+⦁	Default Values Note
+-> -H/--host defaults to "127.0.0.1" if not specified
+-> -p/--port defaults to 8775 if not specified
+-> --adapter defaults to "wsgiref" if not specified (for server mode)
+
+⦁	Additional Notes
+-> Service 1 and Service 2 cover all functional options from help output
+-> Short forms (-s, -c) can be used instead of long forms (--server, --client)
+-> Authentication options (--username, --password) are optional but must be used together if authentication is needed
+-> Database option (--database) is optional and used for IPC state persistence in server mode
+
+=> Informational option (-h/--help) is standalone (exits after showing help)
+=> Short form flags are alternative syntax for Service 1 and Service 2 modes
+
+⦁	-h / --help
+-> Shows only API-level help
+-> Does NOT show:
+        -> sqlmap scan options
+        -> Task parameters
+-> Automation must expose both layers separately:
+        -> sqlmapapi options
+        -> sqlmap options
+
+⦁	Short Flags (-s, -c)
+-> Correctly mapped
+-> Additional note:
+        -> Using both together (-s -c) is invalid
+        -> Only one mode allowed per run

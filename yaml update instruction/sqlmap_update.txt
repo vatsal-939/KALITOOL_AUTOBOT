@@ -1,0 +1,440 @@
+Output of sqlmap -h:
+
+Usage: python3 sqlmap [options]
+
+Options:
+  -h, --help            Show basic help message and exit
+  -hh                   Show advanced help message and exit
+  --version             Show program's version number and exit
+  -v VERBOSE            Verbosity level: 0-6 (default 1)
+
+  Target:
+    At least one of these options has to be provided to define the
+    target(s)
+
+    -u URL, --url=URL   Target URL (e.g. "http://www.site.com/vuln.php?id=1")
+    -g GOOGLEDORK       Process Google dork results as target URLs
+
+  Request:
+    These options can be used to specify how to connect to the target URL
+
+    --data=DATA         Data string to be sent through POST (e.g. "id=1")
+    --cookie=COOKIE     HTTP Cookie header value (e.g. "PHPSESSID=a8d127e..")
+    --random-agent      Use randomly selected HTTP User-Agent header value
+    --proxy=PROXY       Use a proxy to connect to the target URL
+    --tor               Use Tor anonymity network
+    --check-tor         Check to see if Tor is used properly
+
+  Injection:
+    These options can be used to specify which parameters to test for,
+    provide custom injection payloads and optional tampering scripts
+
+    -p TESTPARAMETER    Testable parameter(s)
+    --dbms=DBMS         Force back-end DBMS to provided value
+
+  Detection:
+    These options can be used to customize the detection phase
+
+    --level=LEVEL       Level of tests to perform (1-5, default 1)
+    --risk=RISK         Risk of tests to perform (1-3, default 1)
+
+  Techniques:
+    These options can be used to tweak testing of specific SQL injection
+    techniques
+
+    --technique=TECH..  SQL injection techniques to use (default "BEUSTQ")
+
+  Enumeration:
+    These options can be used to enumerate the back-end database
+    management system information, structure and data contained in the
+    tables
+
+    -a, --all           Retrieve everything
+    -b, --banner        Retrieve DBMS banner
+    --current-user      Retrieve DBMS current user
+    --current-db        Retrieve DBMS current database
+    --passwords         Enumerate DBMS users password hashes
+    --dbs               Enumerate DBMS databases
+    --tables            Enumerate DBMS database tables
+    --columns           Enumerate DBMS database table columns
+    --schema            Enumerate DBMS schema
+    --dump              Dump DBMS database table entries
+    --dump-all          Dump all DBMS databases tables entries
+    -D DB               DBMS database to enumerate
+    -T TBL              DBMS database table(s) to enumerate
+    -C COL              DBMS database table column(s) to enumerate
+
+  Operating system access:
+    These options can be used to access the back-end database management
+    system underlying operating system
+
+    --os-shell          Prompt for an interactive operating system shell
+    --os-pwn            Prompt for an OOB shell, Meterpreter or VNC
+
+  General:
+    These options can be used to set some general working parameters
+
+    --batch             Never ask for user input, use the default behavior
+    --flush-session     Flush session files for current target
+
+  Miscellaneous:
+    These options do not fit into any other category
+
+    --wizard            Simple wizard interface for beginner users
+
+[!] to see full list of options run with '-hh'
+
+==========================================================================
+
+Sqlmap Services:
+
+GLOBAL SQLMAP NOTES (Apply to ALL SERVICES)
+⦁ Legal & Ethical Warning (Project-level note)
+=> sqlmap is an active exploitation tool
+=> Unauthorized use is illegal
+=> Your automation tool must include a disclaimer / confirmation step
+
+⦁ Stateful Tool (Very Important)
+=> sqlmap stores session data
+=> Behavior changes across runs unless: --flush-session is used
+=> Automation must explain cached behavior clearly
+
+1.	Target Definition Service (mandatory)
+
+Syntax:
+sqlmap [target option] [global options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Target Options
+-u <URL> | -g <GOOGLE_DORK>
+
+=> this service is most imp to run others.
+
+⦁ -u vs -g
+-> -g (Google dork):
+        -> Depends on external search engines
+        -> Often blocked / rate-limited
+        -> Results are unpredictable
+-> Automation should:
+        -> Warn users that -g is unstable
+        -> Prefer -u when possible
+
+⦁ Multiple Targets
+-> sqlmap supports multiple targets internally
+-> But: Enumeration and OS access become target-specific
+-> Automation should handle one target per workflow
+
+==========================================================================
+
+2. Request Configuration Service
+
+Syntax:
+sqlmap <target> [request options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Request Body & Parameters
+--data=<DATA>
+
+⦁	Cookie & Session Handling
+--cookie=<COOKIE>
+
+⦁	Identity & Fingerprinting
+--random-agent
+
+⦁	Proxy & Traffic Routing
+--proxy=<PROXY> | --tor
+--check-tor
+
+-> --check-tor requires --tor
+
+=> service 1 is mandatory
+=> 3 and 7 can be combined. 4,5,6 are dependent on pervious.
+
+⦁ --data
+-> Automatically switches request to POST
+-> If combined with: -p (parameter selection)
+-> sqlmap may ignore GET parameters
+-> Automation should clearly indicate request method
+
+⦁ --random-agent
+-> Useful for evasion
+-> But: Can break some WAF bypass heuristics
+-> Should be optional, not default
+
+⦁ --proxy vs --tor
+-> Mutually exclusive (you handled correctly)
+-> Additional reality:
+        -> --tor dramatically slows scans
+        -> Some techniques (Time-based) become unreliable
+
+==========================================================================
+
+3. Injection Configuration Service
+
+Syntax:
+sqlmap <target> [request options] [injection options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Testable Parameters
+-p <PARAMETER(S)>
+
+⦁	Forced Backend DBMS
+--dbms=<DBMS>
+
+=> service 1 is mandatory
+=> 2 and 7 can be combined. 4,5,6 are dependent on pervious.
+
+⦁ -p (Critical for Automation)
+-> If omitted:
+        -> sqlmap tests all parameters
+        -> This increases noise and scan time
+-> Best practice: Encourage explicit parameter selection
+
+⦁ --dbms
+-> Forces backend DBMS
+-> Risks: If wrong → false negatives
+-> Automation should:
+        -> Warn users this reduces detection accuracy
+        -> Recommend use only when DBMS is known
+
+==========================================================================
+
+4. Detection & Testing Service
+
+Syntax:
+sqlmap <target> [request/injection options] [detection options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Test Coverage Level
+--level=<1–5>
+
+⦁	Risk Level
+--risk=<1–3>
+
+⦁	Injection Techniques
+--technique=<TECHS>
+
+available techniques:
+B  (Boolean-based blind)
+E  (Error-based)
+U  (UNION query-based)
+S  (Stacked queries)
+T  (Time-based blind)
+Q  (Inline queries)
+
+-> somewhere not supported with --dbms
+
+=> service 1 is mandatory
+=> 2 and 7 can be combined. 3,5,6 are dependent on pervious.
+
+⦁ --level
+-> Controls:
+        -> Number of parameters tested
+        -> Header-based injections
+-> Higher levels: May test cookies, User-Agent, Referer
+-> Automation must warn: High level = high noise
+
+⦁ --risk
+-> Higher risk:
+        -> Uses heavier payloads
+        -> Can break applications
+-> Risk ≥ 2 should show explicit warning
+
+⦁ --technique
+-> Some techniques:
+        -> Are DBMS-dependent
+        -> Are disabled automatically if unsupported
+-> sqlmap silently drops unsupported techniques
+
+==========================================================================
+
+5. Enumeration Service
+
+Syntax:
+sqlmap <target> [request/injection/detection options] [enumeration options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Global Enumeration Shortcuts
+--all
+
+⦁	DBMS Information
+-b
+--current-user
+--current-db
+
+⦁	Credential Enumeration
+--passwords
+
+⦁	Database Structure Enumeration
+--dbs
+--tables
+--columns
+--schema
+
+-D <database>
+-T <table>
+-C <column>
+
+-> --tables requires -D
+-> --columns requires -D and -T
+
+⦁	Data Extraction
+--dump
+--dump-all
+
+-> --dump requires -D and -T
+
+=> service 1 is mandatory
+=> 2 and 7 can be combined. 3,4,6 are dependent on pervious.
+
+⦁ Hard Dependency Chain
+-> You described it correctly, but add this explicitly:
+
+| Option      | Requires                      |
+| ----------- | ----------------------------- |
+| --tables    | -D                            |
+| --columns   | -D + -T                       |
+| --dump      | -D + -T                       |
+| --passwords | DBMS supports password hashes |
+
+-> Automation must block invalid combinations before execution.
+
+⦁ --all
+-> Extremely noisy
+-> Can take hours
+-> Should show:
+        -> Time estimate warning
+        -> Disk usage warning
+
+==========================================================================
+
+6. OS Access Service
+
+Syntax:
+sqlmap <target> [request/injection/detection options] [OS access options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	OS access options
+--os-shell | --os-pwn
+
+=> service 1 is mandatory
+=> 2 and 7 can be combined. 3,4,5 are dependent on pervious.
+
+⦁	Requires Successful Injection
+-> --os-shell / --os-pwn: Only work after successful exploitation
+-> If injection fails: sqlmap silently skips OS access
+
+⦁	DBMS & Privilege Dependent
+-> Requires:
+        -> DBMS OS-level functions
+        -> High database privileges
+-> Automation must warn: Often fails even when SQLi exists
+
+⦁	--os-pwn
+-> Extremely invasive
+-> May deploy:
+        -> Meterpreter
+        -> Reverse shells
+-> Must be explicitly confirmed by user
+
+==========================================================================
+
+7. Control & Automation Service
+
+Syntax:
+sqlmap <any other services/options> [control options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Automation & Interaction Control
+--batch | --wizard
+
+⦁	Session & State Control
+--flush-session
+
+⦁	Verbosity & Output Control
+-v <0-6>
+
+=> Can combine with anyone.
+
+⦁	--batch
+-> Automatically chooses defaults
+-> Risk: May perform destructive actions silently
+-> Automation should:
+        -> Prefer guided mode
+        -> Use --batch only when user opts in
+
+⦁	--wizard
+-> Overrides normal workflow
+-> Incompatible with: Structured automation
+-> Best excluded from automated pipelines
+
+==========================================================================
+
+8. Informational & Advanced Help Service
+
+Syntax:
+sqlmap [informational/help options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Help & Documentation
+-h | --help
+-hh
+--version
+
+-> -h/--help: Show basic help message and exit
+-> -hh: Show advanced help message and exit (displays full list of all options)
+-> --version: Show program's version number and exit
+
+⦁	Long Form Flag Equivalents
+--url=<URL> (equivalent to -u)
+
+-> All flags shown in basic help use short forms
+-> Long forms exist for most options (e.g., --url for -u)
+
+⦁	Additional Notes
+-> The basic help (-h) shows only commonly used options
+-> Use -hh to see the complete list of all available options
+-> Sqlmap has many advanced options for fine-tuning behavior, custom payloads, tampering, etc.
+-> These advanced options are discoverable via -hh flag
+-> Basic help categories: Target, Request, Injection, Detection, Techniques, Enumeration, OS Access, General, Miscellaneous
+
+⦁	Correction Note
+-> Service 2 note should read: "--check-tor requires --tor" (not "--check-for requires --tor")
+
+=> Informational options are standalone (exit after showing help/version)
+=> Advanced options available via -hh are beyond scope of basic help documentation
+
+⦁	-hh
+-> This is where:
+        -> Tamper scripts
+        -> Advanced payloads
+        -> File read/write options
+        -> Custom injection points exist
+-> Your abstraction is correct to exclude these initially
+-> They can be added later as an “Advanced” layer
+
+
+
+Cross-Service Interaction (Automation-Critical)
+Target
+  → Request
+    → Injection
+      → Detection
+        → Enumeration
+          → OS Access

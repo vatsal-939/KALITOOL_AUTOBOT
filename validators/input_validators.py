@@ -1,8 +1,8 @@
 """
 input_validators.py
 ====================
-Provides reusable validation functions for user input
-across all KaliToolAutoBot modules.
+Provides reusable validation functions for user input across all KaliToolAutoBot modules.
+
 """
 
 import os

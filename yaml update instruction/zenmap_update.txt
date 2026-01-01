@@ -1,0 +1,221 @@
+Output of zenmap -h:
+
+Usage: zenmap [options] [result files]
+
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  --confdir=DIR         Use DIR as the user configuration directory. Default:
+                        /root/.zenmap
+  -f RESULT_FILES, --file=RESULT_FILES
+                        Specify a scan result file in Nmap XML output format.
+                        Can be used more than once to specify several scan
+                        result files.
+  -n, --nmap            Run Nmap with the specified args.
+  -p PROFILE, --profile=PROFILE
+                        Begin with the specified profile selected. If combined
+                        with the -t (--target) option, automatically run the
+                        profile against the specified target.
+  -t TARGET, --target=TARGET
+                        Specify a target to be used along with other options.
+                        If specified alone, open with the target field filled
+                        with the specified target
+  -v, --verbose         Increase verbosity of the output. May be used more
+                        than once to get even more verbosity
+
+==========================================================================
+
+Zenmap Services:
+
+GLOBAL ZENMAP NOTES (APPLY TO ALL SERVICES)
+⦁	Zenmap is a GUI wrapper, not a scanner
+=> Zenmap does not scan by itself
+=> It delegates all scanning to nmap
+=> Any scan failure is almost always:
+        => Missing privileges
+        => Invalid Nmap arguments
+        => Nmap not installed / not in PATH
+
+⦁	Automation limitation
+=> Zenmap is not suitable for headless automation
+=> Requires: X11 / GUI environment
+=> For CLI automation: Use nmap directly
+=> Zenmap is best used for:
+        => Visualization
+        => Profile management
+        => Result comparison (manual)
+
+1.	GUI Launch Service
+
+Syntax:
+zenmap
+
+Options:
+
+⦁	GUI / Environment Options
+--confdir=<DIR>
+-v
+--version
+-h
+
+⦁	GUI Dependency
+-> Requires:
+        -> Active graphical session
+        -> DISPLAY environment variable
+-> Running over SSH requires: X11 forwarding
+-> Otherwise: Zenmap will fail silently or exit
+
+⦁	--confdir
+-> Must be: Writable by user
+-> Incorrect permissions cause:
+        -> Profile load failures
+        -> GUI state loss
+-> Multiple Zenmap instances sharing same confdir may corrupt config
+
+==========================================================================
+
+2. Nmap Execution Service
+
+Syntax:
+zenmap -n "<nmap arguments>"
+
+Options:
+
+⦁	Zenmap-side Options
+--confdir=<DIR>
+-v
+
+⦁	-n "<nmap arguments>" is opaque passthrough
+-> Zenmap does not validate arguments
+-> Invalid Nmap flags:
+        -> Are passed directly
+        -> Errors come from Nmap, not Zenmap
+
+⦁	Quoting Requirement (CRITICAL)
+-> Arguments must be passed as a single quoted string
+
+⦁	Privilege Behavior
+-> If scan requires root:
+        -> Zenmap will prompt
+        -> Or scan silently degrades
+-> Behavior depends on:
+        -> OS
+        -> Polkit / sudo configuration
+
+==========================================================================
+
+3. Profile-based Scan Service
+
+Syntax:
+zenmap -p <profile> -t <target>
+
+Options:
+
+⦁	Zenmap-side Options
+--confdir=<DIR>
+-v
+
+⦁	Profiles are local-state dependent
+-> Profiles are stored in: --confdir
+-> If profile name does not exist:
+        -> Zenmap opens GUI but does not scan
+        -> No explicit error is shown
+
+⦁	-p without -t
+-> Does not execute scan
+-> Only selects profile in GUI
+
+⦁ Profiles are NOT portable by default
+-> Profile definitions:
+        -> Are user-specific
+        -> Are not bundled with Zenmap
+-> Copying profiles requires: Manual export of config directory
+
+==========================================================================
+
+4. Result File Management Service
+
+Syntax:
+zenmap -f scan1.xml [-f scan2.xml...]
+
+Options:
+
+⦁	Zenmap-side Options
+--confdir=<DIR>
+-v
+
+-> file type xml only.
+
+⦁	XML FORMAT IS STRICT
+-> Only Nmap XML output is accepted
+-> Other formats (-oN, -oG, etc.) will:
+        -> Fail to load
+        -> Or silently not display results
+
+⦁	Multiple -f Files
+-> Zenmap loads them into comparison view
+-> Does not merge scans
+-> Time stamps and targets must align for meaningful comparison
+
+⦁	Large XML Files
+-> Large scans may:
+        -> Freeze GUI
+        -> Consume high memory
+-> Zenmap is not optimized for very large datasets
+
+==========================================================================
+
+5. Alternative Syntax & Additional Options Service
+
+Syntax:
+zenmap [alternative syntax options] [result files or service syntax]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Long Form Flag Equivalents
+--help (equivalent to -h)
+--file=<RESULT_FILES> (equivalent to -f)
+--nmap (equivalent to -n)
+--profile=<PROFILE> (equivalent to -p)
+--target=<TARGET> (equivalent to -t)
+--verbose (equivalent to -v)
+
+-> All flags have both short (-flag) and long (--flag) form alternatives
+-> Long forms are equivalent to short forms shown in Services 1-4
+-> --verbose can be used multiple times (like -v) for increased verbosity
+
+⦁	Additional Notes on Flag Usage
+-> --file/-f: Can be used multiple times to specify several result files (Service 4)
+-> --nmap/-n: Requires quoted nmap arguments as a single string (Service 2)
+-> --profile/-p and --target/-t: When combined, automatically runs profile against target (Service 3)
+-> --target/-t: If specified alone, opens GUI with target field pre-filled (Service 3)
+-> --confdir: Default is /root/.zenmap (or user's home directory equivalent)
+
+⦁	Flag Combinations Across Services
+-> --confdir and --verbose/-v can be used with any service (1-4)
+-> --version and --help are informational and exit after display
+-> Result files (-f/--file) must be in Nmap XML output format
+-> Nmap arguments (-n/--nmap) are passed as-is to underlying nmap executable
+
+⦁	Usage Patterns
+-> Services 1-4 cover all functional modes of Zenmap
+-> Long forms provide more explicit, readable command syntax
+-> Short forms provide concise, quick command entry
+-> Both forms are functionally identical
+
+=> Alternative syntax options can be used in place of short forms in Services 1-4
+=> All long forms are equivalent to their short form counterparts
+
+⦁	--version and --help
+-> Always exit immediately
+-> Ignore all other flags if combined
+
+⦁	--verbose / -v
+-> Affects: Zenmap internal logging
+-> Does not increase Nmap verbosity unless: -v is passed inside -n "<nmap args>"
+
+⦁	--nmap vs GUI Profiles
+-> When --nmap is used: Profile selection is bypassed
+-> When -p/-t is used: Arguments come from profile
+-> Mixing mental models leads to confusion

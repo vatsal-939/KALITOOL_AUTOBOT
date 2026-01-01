@@ -1,0 +1,599 @@
+Output of ncat -h:
+
+Ncat 7.95 ( https://nmap.org/ncat )
+Usage: ncat [options] [hostname] [port]
+
+Options taking a time assume seconds. Append 'ms' for milliseconds,
+'s' for seconds, 'm' for minutes, or 'h' for hours (e.g. 500ms).
+  -4                         Use IPv4 only
+  -6                         Use IPv6 only
+  -U, --unixsock             Use Unix domain sockets only
+      --vsock                Use vsock sockets only
+  -C, --crlf                 Use CRLF for EOL sequence
+  -c, --sh-exec <command>    Executes the given command via /bin/sh
+  -e, --exec <command>       Executes the given command
+      --lua-exec <filename>  Executes the given Lua script
+  -g hop1[,hop2,...]         Loose source routing hop points (8 max)
+  -G <n>                     Loose source routing hop pointer (4, 8, 12, ...)
+  -m, --max-conns <n>        Maximum <n> simultaneous connections
+  -h, --help                 Display this help screen
+  -d, --delay <time>         Wait between read/writes
+  -o, --output <filename>    Dump session data to a file
+  -x, --hex-dump <filename>  Dump session data as hex to a file
+  -i, --idle-timeout <time>  Idle read/write timeout
+  -p, --source-port port     Specify source port to use
+  -s, --source addr          Specify source address to use (doesn't affect -l)
+  -l, --listen               Bind and listen for incoming connections
+  -k, --keep-open            Accept multiple connections in listen mode
+  -n, --nodns                Do not resolve hostnames via DNS
+  -t, --telnet               Answer Telnet negotiations
+  -u, --udp                  Use UDP instead of default TCP
+      --sctp                 Use SCTP instead of default TCP
+  -v, --verbose              Set verbosity level (can be used several times)
+  -w, --wait <time>          Connect timeout
+  -z                         Zero-I/O mode, report connection status only
+      --append-output        Append rather than clobber specified output files
+      --send-only            Only send data, ignoring received; quit on EOF
+      --recv-only            Only receive data, never send anything
+      --no-shutdown          Continue half-duplex when receiving EOF on stdin
+      --allow                Allow only given hosts to connect to Ncat
+      --allowfile            A file of hosts allowed to connect to Ncat
+      --deny                 Deny given hosts from connecting to Ncat
+      --denyfile             A file of hosts denied from connecting to Ncat
+      --broker               Enable Ncat's connection brokering mode
+      --chat                 Start a simple Ncat chat server
+      --proxy <addr[:port]>  Specify address of host to proxy through
+      --proxy-type <type>    Specify proxy type ("http", "socks4", "socks5")
+      --proxy-auth <auth>    Authenticate with HTTP or SOCKS proxy server
+      --proxy-dns <type>     Specify where to resolve proxy destination
+      --ssl                  Connect or listen with SSL
+      --ssl-cert             Specify SSL certificate file (PEM) for listening
+      --ssl-key              Specify SSL private key (PEM) for listening
+      --ssl-verify           Verify trust and domain name of certificates
+      --ssl-trustfile        PEM file containing trusted SSL certificates
+      --ssl-ciphers          Cipherlist containing SSL ciphers to use
+      --ssl-servername       Request distinct server name (SNI)
+      --ssl-alpn             ALPN protocol list to use
+      --version              Display Ncat's version information and exit
+
+See the ncat(1) manpage for full options, descriptions and usage examples
+
+==========================================================================
+
+Ncat Services:
+
+Global ncat Notes (Apply to ALL Services)
+⦁ Security Alerts (Very Important)
+=> -e, -c, --lua-exec create remote command execution
+=> These options are dangerous by design and commonly abused
+=> Never expose them on:
+        => Public interfaces
+        => Untrusted networks
+=> Always combine with:
+        => --allow / --deny
+        => TLS (--ssl)
+        => Authentication (external)
+
+⦁ Privilege & Capability Notes
+=> Raw socket features (e.g., SCTP, source routing) may require:
+        => Root privileges
+        => CAP_NET_RAW
+=> Unix sockets (-U) require filesystem permissions on socket path
+
+1. Client Service
+
+Syntax:
+ncat [options] <hostname> <port>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Transport & address
+-u | --sctp
+-4 | -6
+-U | --vsock
+
+-> -U (Unix socket) cannot be combined with: -4, -6 (<hostname> (path is used instead))
+-> use -u | --sctp then we cannot use -U | --vsock and vise-versa.
+
+⦁	Connection
+-w <time>
+-z
+
+-> -z disables stdin/stdout data exchange
+
+⦁	DNS & source
+-n
+-s <addr>
+-p <port>
+
+⦁	Proxy
+--proxy <addr:port>
+--proxy-type <http|socks4|socks5> (this is a proxy sub-option)
+--proxy-auth <user:pass> (this is a proxy sub-option)
+--proxy-dns <local|remote> (this is a proxy sub-option)
+
+-> --proxy <addr:port> must be present first then we can add sub-option
+-> --proxy-type socks4 cannot use --proxy-dns remote
+-> --proxy-dns remote work with socks5, socks4a (internally handled)
+
+⦁	SSL/TLS
+--ssl
+--ssl-verify (this is a ssl sub-option)
+--ssl-trustfile <pem> (this is a ssl sub-option)
+--ssl-servername <SNI> (this is a ssl sub-option)
+
+-> --ssl must be present first then we can add sub-option
+
+⦁	I/O behavior
+--send-only | --recv-only
+--no-shutdown
+-C
+-o <file> | -x <hexfile>
+--append-output
+
+-> --append-output only makes sense with -o or -x
+-> -C works only with text-based protocols (HTTP/SMTP etc.)
+
+⦁ Transport & Addressing
+-> --sctp:
+        -> Often unsupported by OS kernel
+        -> May silently fail or fallback
+-> --vsock:
+        -> Works only in VM environments
+        -> Requires hypervisor support
+
+⦁ Connection Behavior
+-> -z:
+        -> No payload is sent or received
+        -> Exit code indicates success/failure
+        -> Suitable only for connectivity checks
+
+⦁ Proxy Caveats
+-> Proxies apply only in client mode
+-> UDP + proxy: Generally unsupported
+-> Authentication credentials may appear in process list
+
+⦁ TLS Client Notes
+-> --ssl-verify:
+        -> Requires proper CA trustfile
+        -> Otherwise connections fail
+-> --ssl-servername: Required for virtual-hosted TLS services
+
+==========================================================================
+
+2. Server (Listen) Service
+
+Syntax:
+ncat -l [options] <port>
+or
+ncat -l [options] <hostname> <port>
+or
+ncat -lU [options] <socket_path>
+or
+ncat -l --vsock [options] <cid:port>
+
+-> <hostname> is a bind address, not a remote target
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Transport & Binding
+-u | --sctp
+-4 | -6
+-U | --vsock
+-p <port>
+-s <addr>
+
+-> -U (Unix socket) cannot be combined with: -4, -6 (<hostname> (path is used instead))
+-> use -u | --sctp then we cannot use -U | --vsock and vise-versa.
+
+⦁	Connection Handling (Server-specific)
+-k
+-m <n>
+-i <t>
+
+⦁	Access Control (Listen-only)
+--allow <hosts>
+--allowfile <file>
+--deny <hosts>
+--denyfile <file>
+
+-> Evaluation order is deny first, then allow
+
+⦁	Execution (Listen-only)
+-e <command> | -c <command> | --lua-exec <file>
+
+⦁	Broker / Chat Services (Built on listen mode)
+--broker | --chat
+
+⦁	SSL / TLS (Server-side)
+--ssl
+--ssl-cert <pem> (this is a ssl sub-option)
+--ssl-key <pem> (this is a ssl sub-option)
+--ssl-verify (this is a ssl sub-option)
+--ssl-trustfile <pem> (this is a ssl sub-option)
+
+-> --ssl must be present first then we can add sub-option
+
+⦁	I/O Behavior
+--send-only | --recv-only
+--no-shutdown
+-C
+-o <file> | -x <file>
+--append-output
+
+-> --append-output only makes sense with -o or -x
+-> -C works only with text-based protocols (HTTP/SMTP etc.)
+
+⦁ Binding Behavior
+-> <hostname> is bind address, not DNS resolution
+-> Binding to 0.0.0.0 exposes service to all interfaces
+
+⦁ Connection Handling
+-> -k:
+        -> Essential for production listeners
+        -> Without it, server exits after one client
+-> -m:
+        -> Prevents resource exhaustion
+        -> Strongly recommended for public-facing listeners
+
+⦁ Access Control Warning
+-> If no allow/deny rules are defined: All hosts are allowed
+-> IP-based ACLs do not provide authentication
+
+==========================================================================
+
+3. Command Execution Service
+
+Syntax:
+ncat -l [options] -e <command> <port>
+or
+ncat -l [options] -c <command> <port>
+or
+ncat -l [options] --lua-exec <file> <port>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Transport & Binding
+-u | --sctp
+-4 | -6
+-U | --vsock
+-s <addr>
+
+-> -U (Unix socket) cannot be combined with: -4, -6 (<hostname> (path is used instead))
+-> use -u | --sctp then we cannot use -U | --vsock and vise-versa.
+
+⦁	Connection Handling (Strongly Recommended)
+-k
+-m <n>
+-i <t>
+
+⦁	Access Control (Highly Recommended)
+--allow <hosts>
+--allowfile <file>
+--deny <hosts>
+--denyfile <file>
+
+-> Evaluation order is deny first, then allow
+
+⦁	SSL / TLS (Compatible & Recommended)
+--ssl
+--ssl-cert <pem> (this is a ssl sub-option)
+--ssl-key <pem> (this is a ssl sub-option)
+--ssl-verify (this is a ssl sub-option)
+--ssl-trustfile <pem> (this is a ssl sub-option)
+
+-> --ssl must be present first then we can add sub-option
+
+⦁	I/O Behavior (Use with Caution)
+--send-only | --recv-only
+--no-shutdown
+-C
+-o <file> | -x <file>
+--append-output
+
+-> --append-output only makes sense with -o or -x
+-> -C works only with text-based protocols (HTTP/SMTP etc.)
+
+⦁ High-Risk Mode (Explicit Warning)
+-> This mode effectively creates a bind shell
+-> Even with ACLs:
+        -> IP spoofing
+        -> NAT traversal
+        -> Internal threat vectors exist
+
+⦁ Execution Semantics
+-> -e: Executes binary directly
+-> -c:
+        -> Executes via /bin/sh
+        -> Enables shell metacharacter expansion
+-> --lua-exec:
+        -> Executes Lua scripts with network access
+        -> Lua scripts can open files and spawn processes
+
+==========================================================================
+
+4. Broker (Relay) Service
+
+Syntax:
+ncat -l [options] --broker <port>
+or
+ncat -l [options] --broker <hostname> <port>
+or
+ncat -lU [options] --broker <socket_path>
+or
+ncat -l --vsock [options] --broker <cid:port>
+
+Option:
+where ever see | means they cannot be combined.
+
+⦁	Transport & Binding
+-u | --sctp
+-4 | -6
+-U | --vsock
+-s <addr>
+
+-> -U (Unix socket) cannot be combined with: -4, -6 (<hostname> (path is used instead))
+-> use -u | --sctp then we cannot use -U | --vsock and vise-versa.
+
+⦁	Connection Handling (Highly Relevant)
+-k
+-m <n>
+-i <t>
+
+⦁	Access Control (Strongly Recommended)
+--allow <hosts>
+--allowfile <file>
+--deny <hosts>
+--denyfile <file>
+
+-> Evaluation order is deny first, then allow
+
+⦁	SSL / TLS (Fully Compatible)
+--ssl
+--ssl-cert <pem> (this is a ssl sub-option)
+--ssl-key <pem> (this is a ssl sub-option)
+--ssl-verify (this is a ssl sub-option)
+--ssl-trustfile <pem> (this is a ssl sub-option)
+
+-> --ssl must be present first then we can add sub-option
+
+⦁	I/O Behavior (Use with Caution)
+--send-only | --recv-only
+--no-shutdown
+-C
+-o <file> | -x <file>
+--append-output
+
+-> --append-output only makes sense with -o or -x
+-> -C works only with text-based protocols (HTTP/SMTP etc.)
+
+⦁ Behavioral Notes
+-> Acts as a traffic relay, not a proxy
+-> No encryption unless --ssl is enabled
+-> All connected clients can communicate (broadcast-style)
+
+⦁ Resource Risks
+-> Without limits (-m, -i):
+        -> Can be abused for amplification
+        -> Can exhaust file descriptors
+
+==========================================================================
+
+5. Chat Server Service
+
+Syntax:
+ncat -l [options] --chat <port>
+or
+ncat -l [options] --chat <hostname> <port>
+or
+ncat -lU [options] --chat <socket_path>
+or
+ncat -l --vsock [options] --chat <cid:port>
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Transport & Binding
+-u | --sctp
+-4 | -6
+-U | --vsock
+-s <addr>
+
+-> -U (Unix socket) cannot be combined with: -4, -6 (<hostname> (path is used instead))
+-> use -u | --sctp then we cannot use -U | --vsock and vise-versa.
+
+⦁	Connection Handling (Highly Relevant)
+-k
+-m <n>
+-i <t>
+
+⦁	Access Control (Strongly Recommended)
+--allow <hosts>
+--allowfile <file>
+--deny <hosts>
+--denyfile <file>
+
+-> Evaluation order is deny first, then allow
+
+⦁	SSL / TLS (Fully Compatible)
+--ssl
+--ssl-cert <pem> (this is a ssl sub-option)
+--ssl-key <pem> (this is a ssl sub-option)
+--ssl-verify (this is a ssl sub-option)
+--ssl-trustfile <pem> (this is a ssl sub-option)
+
+-> --ssl must be present first then we can add sub-option
+
+⦁	I/O Behavior (Use with Caution)
+--send-only | --recv-only
+--no-shutdown
+-C
+-o <file> | -x <file>
+--append-output
+
+-> --append-output only makes sense with -o or -x
+-> -C works only with text-based protocols (HTTP/SMTP etc.)
+
+⦁ Security Limitations
+-> No authentication
+-> No message integrity
+-> No user isolation
+
+⦁ Intended Use
+-> Testing
+-> Demonstration
+-> Temporary coordination
+-> Not suitable for production messaging
+
+==========================================================================
+
+6. Port / Service Testing (Zero-I/O) Service
+
+Syntax:
+ncat -z [options] <hostname> <port>
+or
+ncat -z example.com 80
+or
+ncat -z -w 2 example.com 443
+or
+ncat -z -u example.com 53
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Transport & address
+-u | --sctp
+-4 | -6
+-U | --vsock
+
+-> -U (Unix socket) cannot be combined with: -4, -6 (<hostname> (path is used instead))
+-> use -u | --sctp then we cannot use -U | --vsock and vise-versa.
+
+⦁	Connection Control (Highly Relevant)
+-w <time>
+
+⦁	DNS & source
+-n
+-s <addr>
+-p <port>
+
+⦁	Proxy (Client-only, Limited Usefulness)
+--proxy <addr:port>
+--proxy-type <http|socks4|socks5> (this is a proxy sub-option)
+--proxy-auth <user:pass> (this is a proxy sub-option)
+--proxy-dns <local|remote> (this is a proxy sub-option)
+
+-> --proxy <addr:port> must be present first then we can add sub-option
+-> --proxy-type socks4 cannot use --proxy-dns remote
+-> --proxy-dns remote work with socks5, socks4a (internally handled)
+
+⦁	SSL/TLS (Compatible)
+--ssl
+--ssl-verify (this is a ssl sub-option)
+--ssl-trustfile <pem> (this is a ssl sub-option)
+--ssl-servername <SNI> (this is a ssl sub-option)
+
+-> --ssl must be present first then we can add sub-option
+
+⦁ Semantics
+-> Success means:
+        -> TCP handshake succeeded
+        -> UDP packet sent (no response guarantee)
+-> Does not validate application-layer services
+
+⦁ Automation Tip
+-> Combine with:
+        -> -w timeout
+        -> Exit-code checking
+-> Useful for scripting health checks
+
+==========================================================================
+
+7. Advanced Options & Utility Service
+
+Syntax:
+ncat [service syntax] [advanced/utility options]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Loose Source Routing (Client-only, Advanced Networking)
+-g <hop1[,hop2,...]> (maximum 8 hops)
+-G <n> (hop pointer: 4, 8, 12, ...)
+
+-> Rarely used, requires IP source routing support
+
+⦁	Timing Control (Additional Options)
+-d, --delay <time>
+-i, --idle-timeout <time> (for client mode, though primarily for listen mode)
+
+-> Time formats: append 'ms' (milliseconds), 's' (seconds), 'm' (minutes), 'h' (hours)
+-> -d: Wait between read/writes
+-> -i: Idle read/write timeout (listed in services but note it can also work in client mode)
+
+⦁	Protocol & Connection Behavior
+-t, --telnet (Answer Telnet negotiations)
+
+-> Useful for Telnet protocol interactions
+
+⦁	SSL/TLS Advanced Options
+--ssl-ciphers <cipherlist>
+--ssl-alpn <protocol-list>
+
+-> --ssl-ciphers: Specify SSL cipherlist to use
+-> --ssl-alpn: ALPN (Application-Layer Protocol Negotiation) protocol list
+-> These are SSL sub-options, require --ssl to be present first
+
+⦁	Verbosity & Debugging
+-v, --verbose (can be used multiple times: -v, -vv, -vvv)
+
+-> Increases verbosity level with each use
+
+⦁	Informational
+-h, --help
+--version
+
+⦁	Long Form Flag Equivalents (Alternative Syntax)
+All flags have long form alternatives where applicable:
+--crlf (equivalent to -C)
+--sh-exec (equivalent to -c)
+--exec (equivalent to -e)
+--max-conns (equivalent to -m)
+--source-port (equivalent to -p)
+--source (equivalent to -s)
+--listen (equivalent to -l)
+--keep-open (equivalent to -k)
+--nodns (equivalent to -n)
+--udp (equivalent to -u)
+--wait (equivalent to -w)
+--hex-dump (equivalent to -x)
+--output (equivalent to -o)
+--verbose (equivalent to -v)
+--unixsock (equivalent to -U)
+--help (equivalent to -h)
+
+⦁	Additional Notes
+-> Options taking time assume seconds by default; append 'ms', 's', 'm', or 'h' for other units
+-> See ncat(1) manpage for full options, descriptions and usage examples
+-> Many advanced options require specific network configurations or privileges
+
+=> Can combine with services 1-6 as appropriate
+=> Advanced networking options may require root/administrator privileges
+
+⦁ Loose Source Routing
+-> Modern networks block source routing
+-> Often ignored by routers
+-> Included mainly for legacy testing
+
+⦁ Timing Controls
+-> -d (delay): Can drastically reduce throughput
+-> -i (idle timeout):
+        -> Prevents hung connections
+        -> Applies to both client & server modes
+
+⦁ Verbosity Behavior
+-> -v is cumulative: -vv ≠ -v 2
+-> High verbosity can: Leak sensitive data to logs

@@ -1,11 +1,11 @@
 """
-tools/Masscan/masscan_adapter.py
+masscan_adapter.py
+================
 
 Interactive adapter for Masscan. Loads yaml/Masscan/masscan.yaml via ManifestLoader,
 prompts user for options, validates inputs using validators.*, builds command tokens,
 displays the final command and can execute it (streams output).
 
-Place this file at: tools/Masscan/masscan_adapter.py
 """
 
 import shlex

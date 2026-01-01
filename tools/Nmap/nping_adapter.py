@@ -1,7 +1,11 @@
 """
-Nping Adapter Module
---------------------
-Handles construction and validation of nping commands based on nping.yaml manifest.
+nping_adapter.py
+================
+
+Interactive adapter for nping. Loads yaml/Masscan/nping.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
+
 """
 
 import shlex

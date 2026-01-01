@@ -1,0 +1,6 @@
+2025-12-18 10:34:00 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ndiff
+2025-12-18 10:36:41 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ncat
+2025-12-18 11:25:04 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nmap
+2025-12-18 12:16:15 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/ncat
+2025-12-18 12:44:20 | INFO     | KaliToolAutoBot | Loaded manifest for Nmap/nping
+2025-12-18 12:45:25 | INFO     | tools.Nmap.nping_adapter | Constructed nping command: nping --tcp --ttl 121 -v 1.1.1.1

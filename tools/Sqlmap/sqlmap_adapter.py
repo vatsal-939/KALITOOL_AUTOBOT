@@ -1,15 +1,11 @@
 """
-tools/Sqlmap/sqlmap_adapter.py
+sqlmap_adapter.py
+================
 
-Interactive adapter to build and optionally run `sqlmap` commands based on
-yaml/Sqlmap/sqlmap.yaml manifest.
+Interactive adapter for Sqlmap. Loads yaml/Masscan/sqlmap.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
 
-Features:
- - Loads manifest via ManifestLoader(base_yaml_dir)
- - Prompts user for choices (enum, multi_enum, url/targets, files, integers)
- - Uses validators: network_validators, input_validators, file_validators
- - Requires explicit confirmation for high-risk options
- - Returns command as list (safe for subprocess) and a quoted string for display
 """
 
 import shlex

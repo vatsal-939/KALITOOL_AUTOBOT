@@ -1,19 +1,11 @@
 """
-tools/Nmap/ncat_adapter.py — UPDATED
+ncat_adapter.py
+================
 
-Improvements:
- - Supports repeating '-v' according to a numeric verbosity count (e.g., -v -v -v)
- - Validates CSV lists (hosts/hops) and numeric args
- - Re-prompts on invalid input
- - Requires explicit confirmation for high-risk flags
- - Keeps returning both cmd_list and cmd_quoted
+Interactive adapter for Ncat. Loads yaml/Masscan/ncat.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
 
-Depends on:
- - manifest_loader.ManifestLoader (load_manifest(tool, command))
- - validators.network_validators
- - validators.file_validators
- - validators.input_validators
- - core.logger.get_logger
 """
 
 import os

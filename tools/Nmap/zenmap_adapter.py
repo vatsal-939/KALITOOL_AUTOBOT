@@ -1,11 +1,11 @@
 """
-tools/Nmap/zenmap_adapter.py
+zenmap_adapter.py
+================
 
-Interactive adapter for the Zenmap frontend (part of the Nmap suite).
-Loads yaml/Nmap/zenmap.yaml, prompts user for options, validates inputs,
-builds a safe command list and quoted string, and optionally executes it.
+Interactive adapter for Zenmap. Loads yaml/Masscan/zenmap.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
 
-Behavior is consistent with other adapters in the project.
 """
 
 import os

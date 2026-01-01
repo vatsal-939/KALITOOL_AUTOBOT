@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 KaliTool AutoBot — Unified CLI Tool for Security Command Automation
-Author: Your Name
 Description:
     This script is the MAIN ENTRY POINT of the KaliTool AutoBot system.
     It acts as a high-level interface, loading available tools, reading YAML manifests,

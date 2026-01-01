@@ -1,0 +1,145 @@
+Output of mkpasswd -h:
+
+Usage: mkpasswd [OPTIONS]... [PASSWORD [SALT]]
+Crypts the PASSWORD using crypt(3).
+
+      -m, --method=TYPE     select method TYPE
+      -5                    like --method=md5crypt
+      -S, --salt=SALT       use the specified SALT
+      -R, --rounds=NUMBER   use the specified NUMBER of rounds
+      -P, --password-fd=NUM read the password from file descriptor NUM
+                            instead of /dev/tty
+      -s, --stdin           like --password-fd=0
+      -h, --help            display this help and exit
+      -V, --version         output version information and exit
+
+If PASSWORD is missing then it is asked interactively.
+If no SALT is specified, a random one is generated.
+If TYPE is 'help', available methods are printed.
+
+Report bugs to <md+whois@linux.it>.
+
+==========================================================================
+
+Mkpasswd Services:
+
+Global mkpasswd Notes (Apply to ALL Services)
+⦁ Security Alerts
+=> mkpasswd does NOT verify password strength
+=> Output hashes are deterministic if PASSWORD + SALT are reused
+=> Weak methods (e.g., MD5) are cryptographically broken
+
+⦁ Automation Pitfalls
+=> mkpasswd always exits with status 0, even for weak/insecure methods
+=> Hash output is printed to stdout only — no file option
+=> Newline characters from stdin become part of password if not trimmed
+
+1. Password Hash Generation Service
+
+Syntax:
+mkpasswd [options] [PASSWORD [SALT]]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Hashing Method Selection
+-m <TYPE> | -5
+
+-> mkpasswd --method=help (to see available methods)
+
+⦁	Salt Handling
+-S <SALT>
+
+⦁	Rounds / Iteration Control
+-R <NUMBER>
+
+⦁	Password Input Source (Non-interactive)
+-P | -s
+
+⦁	Informational / Control Options
+-h
+-v
+
+⦁ Hashing Method Warnings
+-> -5:
+            -> Forces MD5-crypt
+            -> Considered insecure and deprecated
+-> Modern systems prefer:
+            -> sha256crypt
+            -> sha512crypt
+            -> yescrypt (if available)
+
+⦁ Salt Handling Warnings
+-> User-supplied -S:
+            -> Must match method-specific format
+            -> Invalid salt may be silently truncated
+-> Random salts:
+            -> Generated automatically if -S not supplied
+            -> Safer default behavior
+
+⦁ Rounds / Iteration Warnings
+-> -R:
+            -> Ignored by methods that don’t support rounds
+            -> Excessively high values can cause CPU exhaustion
+
+⦁ Password Input Source Pitfalls
+-> -P / -s:
+            -> Disable terminal echo protection
+            -> Password may appear in:
+                  -> Shell history
+                  -> Process list (ps)
+-> -s: Reads from stdin including whitespace and newline
+
+==========================================================================
+
+2. Alternative Syntax & Informational Service
+
+Syntax:
+mkpasswd [options] [PASSWORD [SALT]]
+
+Options:
+where ever see | means they cannot be combined.
+
+⦁	Long Form Flag Alternatives
+--method=<TYPE> (equivalent to -m)
+--salt=<SALT> (equivalent to -S)
+--rounds=<NUMBER> (equivalent to -R)
+--password-fd=<NUM> (equivalent to -P)
+--stdin (equivalent to -s)
+--help (equivalent to -h)
+--version (equivalent to -V)
+
+⦁	Version Information
+-V | --version
+
+-> Note: Service 1 lists -v, but help output shows -V (capital V) for version
+
+⦁	Additional Notes
+-> All flags have both short (-flag) and long (--flag) form alternatives
+-> PASSWORD and SALT can be provided as positional arguments
+-> If PASSWORD is missing, it is asked interactively (unless -P or -s is used)
+-> If no SALT is specified, a random one is generated
+-> Use mkpasswd --method=help to see all available hashing methods
+
+=> Can be used alongside Service 1 options
+=> Long forms are equivalent to short forms shown in Service 1\
+
+⦁ Informational Mode Alerts
+-> --method=help:
+            -> Outputs methods supported by local system
+            -> Available methods vary by:
+                  -> OS
+                  -> libc version
+                  -> PAM configuration
+
+⦁ Version & Help Behavior
+-> --help / --version:
+            -> Exit immediately
+            -> Ignore all other arguments
+-> -V:
+            -> Correct flag for version (capital V)
+            -> -v is invalid (good catch in your notes)
+
+⦁ Positional Argument Pitfalls
+-> Positional PASSWORD: Appears in shell history
+-> Positional SALT: Overrides -S if both provided

@@ -1,9 +1,11 @@
 """
 ndiff_adapter.py
-----------------
-Adapter for Nmap's 'ndiff' tool.
-This module loads YAML configuration for ndiff, interacts with the user,
-validates inputs, and constructs the ndiff command for execution.
+================
+
+Interactive adapter for Ndiff. Loads yaml/Masscan/ndiff.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
+
 """
 
 import os

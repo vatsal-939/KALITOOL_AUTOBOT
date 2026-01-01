@@ -1,16 +1,11 @@
 """
-tools/Sqlmap/sqlmapapi_adapter.py
+sqlmapapi_adapter.py
+================
 
-Interactive adapter for sqlmapapi (server / client). Builds commands from
-yaml/Sqlmap/sqlmapapi.yaml via ManifestLoader, validates inputs, and can
-optionally execute the resulting command.
+Interactive adapter for Sqlmapapi. Loads yaml/Masscan/sqlmapapi.yaml via ManifestLoader,
+prompts user for options, validates inputs using validators.*, builds command tokens,
+displays the final command and can execute it (streams output).
 
-Expected project helpers:
- - manifest_loader.ManifestLoader
- - core.logger.get_logger
- - validators.network_validators
- - validators.file_validators
- - validators.input_validators
 """
 
 import shlex

@@ -1,8 +1,9 @@
 """
 file_validators.py
--------------------
-Responsible for validating the existence, readability, and integrity of file paths 
-and file-based inputs across the Kalitool_Autobot project.
+==================
+
+Responsible for validating the existence, readability, and integrity of file paths and file-based inputs across the Kalitool_Autobot project.
+
 """
 
 import os

@@ -1,5 +1,6 @@
 """
-validators/network_validators.py
+network_validators.py
+================
 
 Common network-related validators used by manifests:
 - validate_ip
@@ -12,8 +13,8 @@ Common network-related validators used by manifests:
 - validate_port_optional
 - validate_host_or_path (for unix socket paths)
 - validate_url
-Each validator raises ValueError with a helpful message if validation fails,
-otherwise returns True (or normalized value where noted).
+Each validator raises ValueError with a helpful message if validation fails, otherwise returns True (or normalized value where noted).
+
 """
 
 import ipaddress

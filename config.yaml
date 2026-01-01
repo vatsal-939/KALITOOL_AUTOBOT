@@ -1,5 +1,4 @@
 # General project configuration for KALITOOL_AUTOBOT
-# Edit these values to match your environment.
 
 # Paths
 yaml_dir: "yaml"                   # where manifests live (relative to project root)
