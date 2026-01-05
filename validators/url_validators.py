@@ -189,3 +189,37 @@ def validate_multiple_urls(value: str) -> bool:
             return False
 
     return True
+
+
+def validate_proxy_auth(value: str) -> bool:
+    """
+    Validate proxy authentication credentials.
+
+    Format: username:password
+
+    Examples:
+    - user:pass
+    - admin:secretpass123
+    - user@domain:password
+    """
+    if not value or not isinstance(value, str):
+        return False
+
+    value = value.strip()
+
+    # Must contain colon separator
+    if ":" not in value:
+        return False
+
+    # Split only on first colon (password may contain colons)
+    parts = value.split(":", 1)
+    if len(parts) != 2:
+        return False
+
+    username, password = parts
+
+    # Both username and password must be non-empty
+    if not username or not password:
+        return False
+
+    return True
